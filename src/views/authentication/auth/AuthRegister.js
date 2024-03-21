@@ -1,0 +1,134 @@
+import React, { useState } from 'react';
+import { Box, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
+import { Stack } from '@mui/system';
+
+
+const AuthRegister = ({ title, subtitle, subtext }) => {
+    const navigate = useNavigate(); // Get the navigate function from react-router-dom
+
+    const [formData, setFormData] = useState({
+        prenom: '',
+        nom: '',
+        email: '',
+        username: '',
+        role: []
+    });
+
+    const [errors, setErrors] = useState({
+
+    });
+
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        if (name === 'role') {
+            let updatedRoles = [...formData.role];
+            if (event.target.checked) {
+                updatedRoles.push(value);
+            } else {
+                updatedRoles = updatedRoles.filter(role => role !== value);
+            }
+            setFormData({ ...formData, [name]: updatedRoles });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        // Validation des champs vides
+        const newErrors = {};
+        Object.keys(formData).forEach((key) => {
+            if (!formData[key]) {
+                newErrors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+            }
+        });
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+        try {
+            // Envoyez les données du formulaire au backend
+            const response = await axios.post('http://localhost:8080/api/auth/signup', formData);
+            console.log(response.data);
+            // Affiche la réponse du backend
+            navigate('/auth/login'); // Corrected: it should be navigate instead of Navigate
+            // Redirigez l'utilisateur vers la page de connexion ou affichez un message de succès
+        } catch (error) {
+            if (error.response && error.response.data.error) {
+                setErrors({ ...errors, username: 'Username or email already exists' });
+            } else if (error.response) {
+                // La requête a été reçue par le serveur, mais le serveur a renvoyé une erreur avec un code de statut HTTP
+                console.error('Erreur lors de l\'inscription :', error.response.data);
+                // Afficher un message d'erreur approprié à l'utilisateur
+                // Par exemple, si le serveur renvoie des erreurs de validation, vous pouvez afficher les détails des erreurs de validation à l'utilisateur
+            } else if (error.request) {
+                // La requête a été effectuée, mais aucune réponse n'a été reçue
+                console.error('Pas de réponse du serveur :', error.request);
+                // Afficher un message d'erreur générique à l'utilisateur
+            } else {
+                // Une erreur s'est produite lors de la configuration de la requête ou lors de la gestion de la réponse
+                console.error('Erreur lors de la configuration de la requête ou de la gestion de la réponse :', error.message);
+                // Afficher un message d'erreur générique à l'utilisateur
+            }
+        }
+    };
+    
+
+    return (
+        <>
+            {title ? (
+                <Typography fontWeight="700" variant="h2" mb={1}>
+                    {title}
+                </Typography>
+            ) : null}
+
+            {subtext}
+
+            <Box component="form" onSubmit={handleSubmit}>
+                <Stack mb={3}>
+                    <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor='prenom' mb="4px">First Name</Typography>
+                    <CustomTextField id="prenom" name="prenom" value={formData.prenom} onChange={handleChange} variant="outlined" fullWidth />
+                    {errors.prenom && <Typography variant="body2" color="error">{errors.prenom}</Typography>}
+                    <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor='nom' mb="4px">Last Name</Typography>
+                    <CustomTextField id="nom" name="nom" value={formData.nom} onChange={handleChange} variant="outlined" fullWidth />
+                    {errors.nom && <Typography variant="body2" color="error">{errors.nom}</Typography>}
+                    <Typography variant="subtitle1" fontWeight={600} component="email" htmlFor='email' mb="4px">Email Address</Typography>
+                    <CustomTextField id="email" name="email" value={formData.email} onChange={handleChange} variant="outlined" fullWidth />
+                    {errors.email && <Typography variant="body2" color="error">{errors.email}</Typography>}
+                    <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor='username' mb="4px">Username</Typography>
+                    <CustomTextField id="username" name="username" value={formData.username} onChange={handleChange} variant="outlined" fullWidth />
+                    {errors.username && <Typography variant="body2" color="error">{errors.username}</Typography>}
+                    <Typography variant="subtitle1" fontWeight={600} component="label" mb="4px">Role</Typography>
+                    <div>
+                        <input type="checkbox" id="admin" name="role" value="admin" onChange={handleChange} checked={formData.role.includes('admin')} />
+                        <label htmlFor="admin">Admin</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="mod" name="role" value="mod" onChange={handleChange} checked={formData.role.includes('mod')} />
+                        <label htmlFor="mod">Moderator</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="user" name="role" value="user" onChange={handleChange} checked={formData.role.includes('user')} />
+                        <label htmlFor="user">SimpleUser</label>
+                    </div>
+                </Stack>
+                {Object.values(errors).map((error, index) => (
+                <Typography key={index} variant="body2" color="error" mb={1}>
+                    {error}
+                </Typography>
+                ))}
+                <Button type="submit" color="primary" variant="contained" size="large" fullWidth >
+                    Sign Up
+                </Button>
+            </Box>
+            {subtitle}
+        </>
+    );
+};
+
+export default AuthRegister;
