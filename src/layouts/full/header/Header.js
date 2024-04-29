@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, AppBar, Toolbar, styled, Stack, IconButton, Badge, Button } from '@mui/material';
 import PropTypes from 'prop-types';
+import { useState,useEffect } from 'react';
 
 // components
 import Profile from './Profile';
@@ -25,7 +26,20 @@ const Header = (props) => {
     width: '100%',
     color: theme.palette.text.secondary,
   }));
-
+  const [username, setUsername] = useState('');
+  useEffect(() => {
+    
+    // Récupérer le nom d'utilisateur depuis localStorage
+    const userDataString = localStorage.getItem('user');
+    if (userDataString) {
+        try {
+            const userData = JSON.parse(userDataString);
+            setUsername(userData.username); // Enregistrer le nom d'utilisateur dans l'état
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+        }
+    }
+}, []);
   return (
     <AppBarStyled position="sticky" color="default">
       <ToolbarStyled>
@@ -41,6 +55,7 @@ const Header = (props) => {
           }}
         >
           <IconMenu width="20" height="20" />
+          
         </IconButton>
 
 
@@ -63,6 +78,7 @@ const Header = (props) => {
         </IconButton>
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
+          <span>{username}</span>
           <Profile />
         </Stack>
       </ToolbarStyled>

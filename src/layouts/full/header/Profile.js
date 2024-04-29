@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Avatar,
@@ -24,6 +24,25 @@ const Profile = () => {
     setAnchorEl2(null);
   };
 
+  function cleanLocalStorage() {
+    localStorage.clear();
+}
+const [username, setUsername] = useState('');
+  useEffect(() => {
+    
+    // Récupérer le nom d'utilisateur depuis localStorage
+    const userDataString = localStorage.getItem('user');
+    if (userDataString) {
+        try {
+            const userData = JSON.parse(userDataString);
+            setUsername(userData.username); // Enregistrer le nom d'utilisateur dans l'état
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+        }
+    }
+}, []);
+
+   
   return (
     <Box>
       <IconButton
@@ -65,11 +84,12 @@ const Profile = () => {
           },
         }}
       >
-        <MenuItem>
+        <MenuItem component={Link} to="/modifierprofile">
           <ListItemIcon>
             <IconUser width={20} />
-          </ListItemIcon>
-          <ListItemText>My Profile</ListItemText>
+            </ListItemIcon>
+          <ListItemText>{username}</ListItemText>
+          
         </MenuItem>
         <MenuItem>
           <ListItemIcon>
@@ -84,7 +104,7 @@ const Profile = () => {
           <ListItemText>My Tasks</ListItemText>
         </MenuItem>
         <Box mt={1} py={1} px={2}>
-          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth>
+          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth  onClick={cleanLocalStorage}>
             Logout
           </Button>
         </Box>

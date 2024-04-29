@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import {
     Box,
     Button,
@@ -77,7 +78,17 @@ const AuthResetPassword = ({ subtext }) => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 mb={2}
-            />
+            /><Typography
+            component={Link}
+            to="/auth/Login"
+            fontWeight="500"
+            sx={{
+                textDecoration: 'none',
+                color: 'primary.main',
+            }}
+        >
+            Annuler ?
+        </Typography>
             <Box mt={3}>
             {error && <Typography variant="body2" color="error" mb={2}>{error}</Typography>}
             <Button type="submit" variant="contained" color="primary" fullWidth mt={2}>

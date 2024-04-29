@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { ReactComponent as LogoDark } from 'src/assets/images/logos/dark-logo.svg';
 import { ReactComponent as LogoSopra } from 'src/assets/images/logos/sopra (2).svg';
 
 

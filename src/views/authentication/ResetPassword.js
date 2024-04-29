@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Grid, Box, Card, Typography } from '@mui/material';
+import { Grid, Box, Card, Typography , Stack} from '@mui/material';
+import { Link } from 'react-router-dom';
 
 // components
 import PageContainer from 'src/components/container/PageContainer';
@@ -46,6 +47,24 @@ const ResetPassword = () => {
                   <Typography variant="subtitle1" textAlign="center" color="textSecondary" mb={1}>
                     The world is how we shape it
                   </Typography>
+                }
+                subtitle={
+                  <Stack direction="row" justifyContent="center" spacing={1} mt={3}>
+                    <Typography color="textSecondary" variant="h6" fontWeight="400">
+                      Annuler !!
+                    </Typography>
+                    <Typography 
+                      component={Link}
+                      to="/auth/login"
+                      fontWeight="500"
+                      sx={{
+                        textDecoration: 'none',
+                        color: 'primary.main',
+                      }}
+                    >
+                      retourner
+                    </Typography>
+                  </Stack>
                 }
               />
             </Card>

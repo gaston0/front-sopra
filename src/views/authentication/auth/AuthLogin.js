@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import axios from 'axios';
 import {
     Box,
@@ -17,28 +17,60 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate(); // Get the navigate function from react-router-dom
+    const navigate = useNavigate(); // Get the navigate function from react-router-dom;
 
+    useEffect(() => {
+        const userDataString = localStorage.getItem('user');
+        
+        if (userDataString) {
+            try {
+                const userData = JSON.parse(userDataString);
+                const userRole = userData.roles && userData.roles.length > 0 ? userData.roles[0] : null;
+    
+                if (userRole === 'ROLE_ADMIN') {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/client/home');
+                }
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                navigate('/auth/login');
+            }
+        } else {
+            navigate('/auth/login');
+        }
+    }, []);
+    
     const handleLogin = async () => {
         try {
             const response = await axios.post('http://localhost:8080/api/auth/signin', {
                 username,
                 password
             });
+            
+            if (response.data && response.data.accessToken) {
+                const token = response.data.accessToken;
+                const user = response.data;
+                
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                const userRole = user.roles && user.roles.length > 0 ? user.roles[0] : null;
     
-            // If login is successful, navigate user to dashboard
-            if (response.data) {
-                console.log(response.data);
-                navigate('/dashboard'); // Redirect to dashboard
+                if (userRole === 'ROLE_ADMIN') {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/client/home');
+                }
             } else {
                 setError('Nom d\'utilisateur ou mot de passe incorrect');
             }
         } catch (error) {
-            // Handle error
+            console.error('Error during login:', error);
             setError('Une erreur est survenue. Veuillez réessayer plus tard.');
         }
-    };
-
+    }; 
+    
     return (
         <>
             {title ? (
