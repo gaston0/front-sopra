@@ -11,7 +11,7 @@ import './Header2.css';
     <div className="main-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <h2 style={{ margin: '0', marginRight: 'auto' }}>All Questions</h2>
       <NavLink to="/client/askquestion">
-      <button className="btn btn-primary custom-btn "style={{marginRight:"20px"}}>Ask Question</button>
+      <button className="btn btn-danger custom-btn "style={{marginRight:"20px"}}>Ask Question</button>
       </NavLink>
     </div>
     <div className="main-desc">

@@ -42,7 +42,7 @@ const Router = [
       { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       { path: '/ui/shadow', exact: true, element: <Shadow /> },
       { path: '/modifierprofile', element: <ModifierProfile /> },
-      { path: '/home', element: <Home /> },
+      //{ path: '/home', element: <Home /> },
 
 
       { path: '*', element: <Navigate to="/auth/404" /> },

@@ -13,17 +13,17 @@ const Dashboard = () => {
   useEffect(() => {
     // Retrieve user data from localStorage
     const userDataString = localStorage.getItem('user');
-    console.log('userDataString:', userDataString);
+    
 
     if (userDataString) {
         try {
             // Parse the user data from JSON string to JavaScript object
             const userData = JSON.parse(userDataString);
-            console.log('userData:', userData);
+            
 
             // Access user role directly from the userData object
             const userRole = userData.roles && userData.roles.length > 0 ? userData.roles[0] : null;
-            console.log('userRole:', userRole);
+            
 
             // Redirect user based on role
             if (userRole === 'ROLE_ADMIN') {

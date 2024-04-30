@@ -25,7 +25,7 @@ const ListUsers = () => {
                     try {
                         const userData = JSON.parse(userDataString);
                         
-                        console.log('Identifiant de l\'utilisateur connecté:', userData.id); // Utiliser le champ "matricule"
+                         // Utiliser le champ "matricule"
                         
                         // Filtrer les utilisateurs pour exclure l'utilisateur connecté
                         const filteredUsers = response.data.filter(user => user.matricule !== parseInt(userData.id)); // Utiliser "matricule" au lieu de "id"

@@ -30,7 +30,7 @@ function Acceuil() {
                                 <p>Find the best answer to your technical question, help others answer theirs. DoubtOut is a community-based space to find and contribute answers to technical challenges.</p>
                             </div>
                             <div className="d-flex justify-content-start">
-                                <Link to={'/client/questionpage'}><button className="btn btn-primary custom-btn ">Get Started</button></Link>
+                                <Link to={'/client/questionpage'}><button className="btn btn-danger custom-btn ">Get Started</button></Link>
 
                             </div>
                         </div>

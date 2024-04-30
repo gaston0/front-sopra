@@ -107,22 +107,20 @@ const AskPage = () => {
                 <div className="form-group">
                   <label htmlFor="exampleInputEmail1">Title</label>
                   <input type="text" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter Title" />
-                  <small id="emailHelp" className="form-text text-muted">Enter Your title in few Words</small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="exampleInputEmail1">Subject</label>
+                  <textarea className="form-control" placeholder="Enter description" />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="exampleInputEmail1">Add file</label>
+                  <input type ='file' className="form-control"  />
                 </div>
               </div>
             </div>
 
-            <div className="card mt-3">
-              <div className="card-body">
-                <JoditEditor
-                  ref={editor}
-                  value={content}
-                  config={config}
-                  tabIndex={1}
-                  onBlur={newContent => setContent(newContent)}
-                />
-              </div>
-            </div>
 
             <div className="card mt-3">
               <div className="card-body">
@@ -133,7 +131,7 @@ const AskPage = () => {
                 </div>
               </div>
             </div>
-            <button type="submit" className="btn btn-primary custom-btn mt-5 mb-5">Ask Question</button>
+            <button type="submit" className="btn btn-danger custom-btn mt-5 mb-5">Ask Question</button>
           </form>
         </div>
       </div>

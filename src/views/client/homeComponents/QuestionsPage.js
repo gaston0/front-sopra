@@ -4,6 +4,7 @@ import Sidebar from "./sidebar";
 import NewNavbar from "./NewNavbar";
 import Header2 from "./Header2";
 import { NavLink } from "react-router-dom";
+import QuestionRow from "./QuestionsRow";
 
 
 
@@ -26,7 +27,12 @@ function QuestionsPage(){
           <Sidebar />
           <div style={{ flex: 1 }}> {/* This div will take up the remaining space */}
             <Header2 />
+            <QuestionRow />
+            <QuestionRow />
+            <QuestionRow />
+            <QuestionRow />
           </div>
+          
         </div>
       </>
       

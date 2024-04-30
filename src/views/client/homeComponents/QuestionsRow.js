@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 
 const QuestionStat = styled.div`
@@ -37,11 +39,12 @@ margin-bottom:5px;
 
 `;
 const StyledQuestionRow = styled.div`
-background-color: rgba(0, 0, 0, 0.05);
+background-color: rgba(0, 0, 0, 0.01);
 padding :15px 15px 10px;
 display: grid;
 grid-template-columns: repeat(3, 50px) 1fr;
-border-top: 1px solid #555;
+border: 1px solid #dc3545;
+margin-bottom :20px;
 `;
 
 const WhoAndWhen = styled.div`
@@ -55,7 +58,37 @@ const UserLink = styled.a`
 color: #bc1434;
 `;
 function QuestionRow(){
+
+    const [questionData, setQuestionData] = useState(null);
+    const [userName, setUserName] = useState(null);
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+    }
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/api/questions/all');
+                setQuestionData(response.data);
+                console.log(response.data.user_id)
+            } catch (error) {
+                console.error('Error fetching question data:', error.message);
+            }
+        };
+
+        fetchQuestions();
+    }, []);
+    
     return(
+        <>
         <StyledQuestionRow>
             <QuestionStat>0<span>votes</span></QuestionStat>
                 <QuestionStat>0<span>answers</span></QuestionStat>
@@ -71,6 +104,7 @@ function QuestionRow(){
                     </WhoAndWhen>
                 </QuestionTitleArea>
         </StyledQuestionRow>
+    </>
     )
 }
 
