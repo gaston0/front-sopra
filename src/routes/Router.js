@@ -7,6 +7,7 @@ import ProfilePage from 'src/views/client/ProfilePage';
 import QuestionsPageById from 'src/views/client/QuestionPageById';
 import { element } from 'prop-types';
 import QuestionsPage from 'src/views/client/homeComponents/QuestionsPage';
+import AjouterModerateur from 'src/views/sample-page/AjouterModerateur';
 
 
 
@@ -19,7 +20,7 @@ const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')))
 
 /* ****Pages***** */
 const Dashboard = Loadable(lazy(() => import('../views/dashboard/Dashboard')))
-const SamplePage = Loadable(lazy(() => import('../views/sample-page/SamplePage')))
+const ListTags = Loadable(lazy(() => import('../views/sample-page/ListTags')))
 const Icons = Loadable(lazy(() => import('../views/icons/Icons')))
 const TypographyPage = Loadable(lazy(() => import('../views/utilities/TypographyPage')))
 const Shadow = Loadable(lazy(() => import('../views/utilities/Shadow')))
@@ -37,11 +38,12 @@ const Router = [
     children: [
       { path: '/', element: <Navigate to="/auth/login" /> },
       { path: '/dashboard', exact: true, element: <Dashboard /> },
-      { path: '/sample-page', exact: true, element: <SamplePage /> },
+      { path: '/listoftags', exact: true, element: <ListTags/> },
       { path: '/icons', exact: true, element: <Icons /> },
       { path: '/ui/typography', exact: true, element: <TypographyPage /> },
       { path: '/ui/shadow', exact: true, element: <Shadow /> },
       { path: '/modifierprofile', element: <ModifierProfile /> },
+      { path: '/ajoutermoderateur', element: <AjouterModerateur /> },
       //{ path: '/home', element: <Home /> },
 
 
