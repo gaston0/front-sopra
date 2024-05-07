@@ -42,8 +42,8 @@ const votreToken = localStorage.getItem("token");
                 <div className="stack-index">
                     <div className="stack-index-content">
                         <div className="main">
-                            <h1>Tags</h1>
-                            <div className='mt-3'>
+                            <h1 style={{marginTop : "-30px"}}>Tags</h1>
+                            <div className='mt-3'  >
                                 A tag is a keyword or label that categorizes your question with other, similar questions.
                                 <br />
                                 Using the right tags makes it easier for others to find and answer your question.

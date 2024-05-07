@@ -15,12 +15,13 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
         nom: '',
         email: '',
         username: '',
-        role: []
+        role: ["user"]
     });
 
     const [errors, setErrors] = useState({
 
     });
+    const [loading, setLoading] = useState(false); // Définir l'état loading
 
 
     const handleChange = (event) => {
@@ -55,10 +56,14 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
             // Envoyez les données du formulaire au backend
             const response = await axios.post('http://localhost:8082/api/auth/signup', formData);
             console.log(response.data);
-            // Affiche la réponse du backend
+            alert('Inscription réussie !');
+            setLoading(false); // Définir l'état de chargement sur false après la réception de la réponse
+            // Afficher un message de succès
+            
             navigate('/auth/login'); // Corrected: it should be navigate instead of Navigate
             // Redirigez l'utilisateur vers la page de connexion ou affichez un message de succès
         } catch (error) {
+            setLoading(false)
             if (error.response && error.response.data.error) {
                 setErrors({ ...errors, username: 'Username or email already exists' });
             } else if (error.response) {
@@ -103,19 +108,7 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
                     <Typography variant="subtitle1" fontWeight={600} component="label" htmlFor='username' mb="4px">Username</Typography>
                     <CustomTextField id="username" name="username" value={formData.username} onChange={handleChange} variant="outlined" fullWidth />
                     {errors.username && <Typography variant="body2" color="error">{errors.username}</Typography>}
-                    <Typography variant="subtitle1" fontWeight={600} component="label" mb="4px">Role</Typography>
-                    <div>
-                        <input type="checkbox" id="admin" name="role" value="admin" onChange={handleChange} checked={formData.role.includes('admin')} />
-                        <label htmlFor="admin">Admin</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="mod" name="role" value="mod" onChange={handleChange} checked={formData.role.includes('mod')} />
-                        <label htmlFor="mod">Moderator</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="user" name="role" value="user" onChange={handleChange} checked={formData.role.includes('user')} />
-                        <label htmlFor="user">SimpleUser</label>
-                    </div>
+                    
                 </Stack>
                 {Object.values(errors).map((error, index) => (
                 <Typography key={index} variant="body2" color="error" mb={1}>
