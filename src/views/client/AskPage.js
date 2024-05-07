@@ -26,7 +26,7 @@ const AskPage = () => {
   useEffect(() => {
     const fetchTags = async () => {
         try {
-          const response = await axios.get('http://localhost:8082/api/tags/getAll', {
+          const response = await axios.get('http://localhost:8080/api/tags/getAll', {
             headers: {
                 'Authorization': `Bearer ${votreToken}`
             }
@@ -85,7 +85,7 @@ const AskPage = () => {
 
     // Send the data to the server with Axios
     try {
-        const response = await axios.post('http://localhost:8082/api/questions/create', formData, {
+        const response = await axios.post('http://localhost:8080/api/questions/create', formData, {
             headers: headers, // Pass the headers object to Axios
         });
         console.log('Response:', response.data);

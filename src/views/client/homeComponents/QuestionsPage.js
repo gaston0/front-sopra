@@ -84,7 +84,7 @@ const QuestionsPage = () => {
     useEffect(() => {
         const fetchQuestions = async () => {
           try {
-            const response = await axios.get(`http://localhost:8082/api/questions/all?offset=${0}&limit=${5}`, {
+            const response = await axios.get(`http://localhost:8080/api/questions/all?offset=${0}&limit=${5}`, {
               headers: {
                 'Authorization': `Bearer ${votreToken}`
               }

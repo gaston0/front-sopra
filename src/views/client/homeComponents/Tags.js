@@ -12,7 +12,7 @@ const votreToken = localStorage.getItem("token");
     useEffect(() => {
         const fetchTags = async () => {
             try {
-                const response = await axios.get('http://localhost:8082/api/tags/getAll', {
+                const response = await axios.get('http://localhost:8080/api/tags/getAll', {
                     headers: {
                         'Authorization': `Bearer ${votreToken}`
                     }

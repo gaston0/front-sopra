@@ -31,7 +31,7 @@ const NewNavbar = () => {
               <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" Style={{ bsSscrollHheight: "100px" }}>
               </ul>
     
-              <form className="d-flex me-auto" style={{width:"600px"}}>
+              <form className="d-flex me-auto" style={{width:"600px", marginRight :"10px"}}>
     <input className="form-control me-2" id="searchQue" type="search" placeholder="Search" aria-label="Search" />
     <button className="btn btn-outline-danger" type="submit">Search</button>
   </form>

@@ -77,9 +77,9 @@ const ListUsers = () => {
   const handleRoleEdit = (userId, newRole) => {
     // Make an API call to update the user role
     axios
-      .put(`http://localhost:8080/api/user/${userId}`, { role: newRole })
+      .put(`http://localhost:8080/api/${userId}/role`, { newRoleName: newRole })
       .then((response) => {
-        console.log(response)
+        console.log(response);
         // Update the user role in the state
         setUsers((prevUsers) =>
           prevUsers.map((user) => {
@@ -87,7 +87,7 @@ const ListUsers = () => {
               return { ...user, roles: [newRole] };
             }
             return user;
-          }),
+          })
         );
         alert('User role updated successfully!');
       })
@@ -95,7 +95,7 @@ const ListUsers = () => {
         console.error('Error updating user role:', error);
       });
   };
-
+  
   const handleRoleClick = (userId, currentRole) => {
     const newRole = prompt('Enter the new role:');
     if (newRole !== null && newRole !== '') {
@@ -176,7 +176,7 @@ const ListUsers = () => {
           </TableBody>
         </Table>
         <h1 style={{ marginTop: '30px', fontSize: '14px', marginRight: '50px' }}>
-          you can change role by clicking of it*
+          you can change role by clicking of it*(ROLE_MODERATOR OR ROLE_USER OR ROLE_ADMIN)
         </h1>
       </Box>
     </DashboardCard>
