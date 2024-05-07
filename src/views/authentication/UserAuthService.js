@@ -3,7 +3,7 @@ import axios from 'axios';
 class UserAuthService {
   async login(username, password) {
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/signin', {
+      const response = await axios.post('http://localhost:8082/api/auth/signin', {
         username,
         password
       });

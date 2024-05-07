@@ -10,14 +10,36 @@ import { useNavigate } from "react-router";
 
 const AskPage = () => {
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tags, setTags] = useState("");
-  const editor = useRef(null);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [file, setFile] = useState(null);
+  const [tagId, setTagId] = useState('');
+    const [tags, setTags] = useState([]);
+      const editor = useRef(null);
+      const votreToken = localStorage.getItem('token');
 
   const config = {
     // Vos configurations JoditEditor
   };
+
+
+  useEffect(() => {
+    const fetchTags = async () => {
+        try {
+          const response = await axios.get('http://localhost:8082/api/tags/getAll', {
+            headers: {
+                'Authorization': `Bearer ${votreToken}`
+            }
+        });
+            setTags(response.data); // Assuming the response data is an array of tags
+        } catch (error) {
+            console.error('Error fetching tags:', error);
+        }
+    };
+
+    fetchTags();
+}, []);
+
 
   useEffect(() => {
     if (editor.current) {
@@ -37,48 +59,47 @@ const AskPage = () => {
     }
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent the form from submitting normally
-  
+    
     // Retrieve the authentication token from localStorage
-    const votreToken = localStorage.getItem('token');
-  
+    
     // Check if the token is present
     if (!votreToken) {
-      alert('Please log in to ask a question.');
-      navigate('/auth/login'); // Redirect to the login page
-      return;
+        alert('Please log in to ask a question.');
+        navigate('/auth/login'); // Redirect to the login page
+        return;
     }
 
-    // Envoyer les données au serveur avec Axios
-    axios.post('http://localhost:8080/api/questions/create', {
-      title: title,
-      content: content,
-      tags: tags
-    }, {
-      headers: {
-        'Authorization': `Bearer ${votreToken}`, // Ajouter le token d'authentification dans les en-têtes
-        'Content-Type': 'application/json'
+    // Create a headers object with the authentication token
+    const headers = {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${votreToken}`, // Include the token in the Authorization header
+    };
+
+    const formData = new FormData();
+    formData.append('questionRequest.title', title);
+    formData.append('questionRequest.content', content);
+    formData.append('file', file);
+    formData.append('tagId', tagId);
+
+    // Send the data to the server with Axios
+    try {
+        const response = await axios.post('http://localhost:8082/api/questions/create', formData, {
+            headers: headers, // Pass the headers object to Axios
+        });
+        console.log('Response:', response.data);
+
+
+        if (response.status === 200) {
+          alert('Question created successfully!');
+          navigate('/client/questionpage'); // Redirect to home page or wherever you want
       }
-    })
-    .then(response => {
-      if (response.status === 200) {
-        console.log(response)
-        alert('Question soumise avec succès !');
-        // Réinitialiser le formulaire si nécessaire
-        setTitle("");
-        setContent("");
-        setTags("");
-        document.getElementById('question-form').reset();
-      } else {
-        alert('Une erreur s\'est produite. Veuillez réessayer.');
-      }
-    })
-    .catch(error => {
-      console.error('Erreur lors de la soumission de la question :', error);
-      alert('Une erreur s\'est produite. Veuillez réessayer.');
-    });
-  };
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
+
     
     return(
       <>
@@ -106,17 +127,17 @@ const AskPage = () => {
               <div className="card-body">
                 <div className="form-group">
                   <label htmlFor="exampleInputEmail1">Title</label>
-                  <input type="text" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter Title" />
+                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}  className="form-control" />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="exampleInputEmail1">Subject</label>
-                  <textarea className="form-control" placeholder="Enter description" />
+                  <textarea value={content} onChange={(e) => setContent(e.target.value)}  className="form-control" />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="exampleInputEmail1">Add file</label>
-                  <input type ='file' className="form-control"  />
+                  <input type="file" onChange={(e) => setFile(e.target.files[0])}  className="form-control" />
                 </div>
               </div>
             </div>
@@ -126,7 +147,13 @@ const AskPage = () => {
               <div className="card-body">
                 <div className="form-group">
                   <label htmlFor="exampleInputTags">Question Tags</label>
-                  <input type="text" className="form-control" value={tags} onChange={(e) => setTags(e.target.value)} id="exampleInputTags" aria-describedby="emailHelp" placeholder="Enter Tags" />
+
+ <select className="form-control" value={tagId} onChange={(e) => setTagId(e.target.value)}>
+                <option value="">Select a tag</option>
+                {tags.map(tag => (
+                    <option key={tag.id} value={tag.id}>{tag.name}</option>
+                ))}
+            </select>
                   <small id="emailHelp" className="form-text text-muted">Enter Question Tags</small>
                 </div>
               </div>

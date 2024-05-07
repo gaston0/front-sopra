@@ -7,7 +7,7 @@ import ProfilePage from 'src/views/client/ProfilePage';
 import QuestionsPageById from 'src/views/client/QuestionPageById';
 import { element } from 'prop-types';
 import QuestionsPage from 'src/views/client/homeComponents/QuestionsPage';
-
+import Tags from 'src/views/client/homeComponents/Tags';
 
 
 
@@ -69,7 +69,10 @@ const Router = [
       { path: '/client/askquestion', element: <AskPage /> },
       {path:  '/client/questionpage', element:<QuestionsPage />},
       { path: '/client/profile', element: <ProfilePage /> },
-      { path: '/client/question', element: <QuestionsPageById /> },
+      { path: '/client/question/:questionId', element: <QuestionsPageById /> },
+
+      { path: '/client/tags', element: <Tags /> },
+
     ],
   },
   

@@ -53,7 +53,7 @@ const AuthRegister = ({ title, subtitle, subtext }) => {
         }
         try {
             // Envoyez les données du formulaire au backend
-            const response = await axios.post('http://localhost:8080/api/auth/signup', formData);
+            const response = await axios.post('http://localhost:8082/api/auth/signup', formData);
             console.log(response.data);
             // Affiche la réponse du backend
             navigate('/auth/login'); // Corrected: it should be navigate instead of Navigate

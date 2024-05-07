@@ -28,28 +28,18 @@ const Sidebar = () => {
   <hr />
   <ul className="nav nav-pills flex-column mb-auto pt-3">
     <li >
-    <a href="#" className="nav-link link-dark">
+    <a href="/client/questionpage" className="nav-link link-dark">
         <svg className="bi me-2" width={16} height={16}><use xlinkHref="#speedometer2" /></svg>
-        Dashboard
+        Question
       </a>
      
     </li>
+
+
     <li>
-      <a href="#" className="nav-link link-dark">
-        <svg className="bi me-2" width={16} height={16}><use xlinkHref="#speedometer2" /></svg>
-        Dashboard
-      </a>
-    </li>
-    <li>
-      <a href="#" className="nav-link link-dark">
-        <svg className="bi me-2" width={16} height={16}><use xlinkHref="#table" /></svg>
-        Orders
-      </a>
-    </li>
-    <li>
-      <a href="#" className="nav-link link-dark">
+      <a href="/client/tags" className="nav-link link-dark">
         <svg className="bi me-2" width={16} height={16}><use xlinkHref="#grid" /></svg>
-        Products
+        Tags
       </a>
     </li>
     <li>
