@@ -1,10 +1,10 @@
 import React, { useRef, useState,useEffect,setState} from "react";
-import JoditEditor from "jodit-react";
-import parse from "html-react-parser";
 import NewNavbar from "./homeComponents/NewNavbar";
 import "./askpage.css";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
+
 
 
 
@@ -85,20 +85,28 @@ const AskPage = () => {
 
     // Send the data to the server with Axios
     try {
-        const response = await axios.post('http://localhost:8080/api/questions/create', formData, {
-            headers: headers, // Pass the headers object to Axios
-        });
-        console.log('Response:', response.data);
-
-
-        if (response.status === 200) {
-          alert('Question created successfully!');
+      const response = await axios.post('http://localhost:8080/api/questions/create', formData, {
+          headers: headers, // Pass the headers object to Axios
+      });
+  
+      if (response.status === 200) {
+          await Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Question created successfully!',
+          });
+  
           navigate('/client/questionpage'); // Redirect to home page or wherever you want
       }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-};
+  } catch (error) {
+      console.error('Error:', error);
+      await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while creating the question. Please try again later.',
+      });
+  }
+  }  
 
     
     return(

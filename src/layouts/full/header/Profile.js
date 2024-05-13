@@ -17,6 +17,18 @@ import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+
+
+  const [userRole, setUserRole] = useState(localStorage.getItem("role"));
+
+    useEffect(() => {
+        // Fetch user role from localStorage
+        const storedRole = localStorage.getItem("role");
+        if (storedRole) {
+            setUserRole(storedRole);
+        }
+    }, []);
+
   const handleClick2 = (event) => {
     setAnchorEl2(event.currentTarget);
   };
@@ -84,13 +96,24 @@ const [username, setUsername] = useState('');
           },
         }}
       >
-        <MenuItem component={Link} to="/modifierprofile">
-          <ListItemIcon>
-            <IconUser width={20} />
-            </ListItemIcon>
-          <ListItemText>{username}</ListItemText>
-          
-        </MenuItem>
+        <div>
+            {/* Conditionally render MenuItem based on user's role */}
+            {userRole === "ROLE_ADMIN" ? (
+                <MenuItem component={Link} to="/modifierprofile">
+                    <ListItemIcon>
+                        <IconUser width={20} />
+                    </ListItemIcon>
+                    <ListItemText>{username}</ListItemText>
+                </MenuItem>
+            ) : (
+                <MenuItem component={Link} to="/other-page" >
+                <ListItemIcon>
+                        <IconUser width={20} />
+                    </ListItemIcon>
+                    <ListItemText>{username}</ListItemText>
+                </MenuItem>
+            )}
+        </div>
         <MenuItem>
           <ListItemIcon>
             <IconMail width={20} />

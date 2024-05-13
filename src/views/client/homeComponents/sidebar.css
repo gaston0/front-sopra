@@ -1,5 +1,5 @@
 .stack-index {
-    display: flex;
+    display: block !important;
     min-height: 85vh;
     min-width:  fit-content;
     

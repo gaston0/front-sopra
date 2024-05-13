@@ -29,6 +29,7 @@ const AuthResetPassword = ({ subtext }) => {
                 });
     
                 // Réinitialisation réussie, naviguer vers la page de connexion
+                alert('changement de mot de passe a reussi')
                 navigate('/auth/login');
             } catch (error) {
                 // Gérer les erreurs
@@ -82,9 +83,11 @@ const AuthResetPassword = ({ subtext }) => {
             component={Link}
             to="/auth/Login"
             fontWeight="500"
+            marginTop ="20px"
             sx={{
                 textDecoration: 'none',
                 color: 'primary.main',
+                
             }}
         >
             Annuler ?
