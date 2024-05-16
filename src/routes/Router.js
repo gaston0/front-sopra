@@ -9,6 +9,7 @@ import { element } from 'prop-types';
 import QuestionsPage from 'src/views/client/homeComponents/QuestionsPage';
 import Tags from 'src/views/client/homeComponents/Tags';
 import AjouterModerateur from 'src/views/sample-page/AjouterModerateur';
+import UserProfile from 'src/views/client/UserProfile';
 
 
 
@@ -76,6 +77,7 @@ const Router = [
       { path: '/client/question/:questionId', element: <QuestionsPageById /> },
 
       { path: '/client/tags', element: <Tags /> },
+      {path : '/client/profile', element: <UserProfile />}
 
     ],
   },

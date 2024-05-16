@@ -1,24 +1,11 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import Sidebar from "./sidebar";
-import NewNavbar from "./NewNavbar";
-import Header2 from "./Header2";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import Sidebar from './sidebar';
+import NewNavbar from './NewNavbar';
+import Header2 from './Header2';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Pagination from './pagination';
-
-
-// Fonction pour formater la date
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-}
 
 const QuestionStat = styled.div`
   text-align: center;
@@ -65,74 +52,109 @@ const StyledQuestionRow = styled.div`
   margin-bottom: 20px;
 `;
 
-const WhoAndWhen = styled.div`
-  display: inline-block;
-  color: #aaa;
-  font-size: 0.8rem;
-  float: right;
-  padding: 10px 0;
-`;
-
-const UserLink = styled.a`
-  color: #bc1434;
-`;
-
 const QuestionsPage = () => {
-    const [questionData, setQuestionData] = useState([]);
-    const votreToken = localStorage.getItem('token');
-  
-    useEffect(() => {
-        const fetchQuestions = async () => {
-          try {
-            const response = await axios.get(`http://localhost:8080/api/questions/all?offset=${0}&limit=${5}`, {
-              headers: {
-                'Authorization': `Bearer ${votreToken}`
-              }
-            });
-            setQuestionData(response.data);
-          } catch (error) {
-            console.error('Error fetching question data:', error.message);
-          }
-        };
-      
-        fetchQuestions();
-      }, [votreToken]);
-  
-    return (
-      <>
-        <NewNavbar />
-        <div style={{ display: 'flex' }}>
-          <Sidebar />
-          <div style={{ flex: 1 }}>
-            <Header2 />
-            <>
-              {questionData.map((question, index) => (
-                <StyledQuestionRow key={index}>
-                  <QuestionStat>0<span>votes</span></QuestionStat>
-                  <QuestionStat>0<span>answers</span></QuestionStat>
-                  <QuestionStat>0<span>views</span></QuestionStat>
-                  <QuestionTitleArea>
-                    <QuestionLink to={`/client/question/${question.id}`}>{question.title}</QuestionLink>
-                    {question.tags.map((tag, index) => (
-                      <Tag key={index}>{tag.name}</Tag>
-                    ))}
-                    <WhoAndWhen>
-                      asked {formatDate(question.createdAt)} ago <UserLink>{question.user_id}</UserLink>
-                    </WhoAndWhen>
-                  </QuestionTitleArea>
-                </StyledQuestionRow>
-              ))}
-              <Pagination
-                currentPage={1} // Assuming initial page is 1
-                postPerPage={5} // Assuming 5 questions per page
-                totalPosts={questionData.length} // Assuming this is the total count of questions
-                paginate={() => {}} // Placeholder function, actual pagination logic needs to be added
-              />
-            </>
-          </div>
-        </div>
-      </>
-    );
+  const [questions, setQuestions] = useState([]);
+  const [postPerPage] = useState(4);
+  const [currentPage, setcurrentPage] = useState(1);
+  const [questionDatas, setQuestionData] = useState([]);
+  const [error, setError] = useState(null);
+
+  const votreToken = localStorage.getItem('token');
+  const handlePageChange = (pageNumber) => {
+    setcurrentPage(pageNumber);
   };
+  const fetchAllQuestions = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/questions/all', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: '',
+          content: '',
+          userId: null,
+          tags: [],
+          pageIndex: 0,
+          pageSize: 40,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setQuestionData(data);
+      } else {
+        console.error('Data is not an array:', data);
+      }
+    } catch (error) {
+      console.error('There was an error fetching questions:', error);
+    }
+  };
+  useEffect(() => {
+    fetchAllQuestions();
+    // FindFrequencyOfAns();
+    // fetchVotes();
+  }, [votreToken]);
+
+  const indexOfLastPost = currentPage * postPerPage;
+  const indexOfFirstPost = indexOfLastPost - postPerPage;
+  const currentPosts = questionDatas.slice(indexOfFirstPost, indexOfLastPost);
+
+  const paginate = (pageNum) => setcurrentPage(pageNum);
+
+  const handleDataFromChild = (data) => {
+    // Faire quelque chose avec les données reçues du composant enfant (Header2)
+    console.log('Données reçues du composant ahmed (Header2) :', data);
+    setQuestionData(data);
+
+    // Tu peux faire ici tout traitement nécessaire avec les données du composant enfant
+  };
+
+  return (
+    <>
+      <NewNavbar />
+      <div style={{ display: 'flex' }}>
+        <Sidebar />
+        <div style={{ flex: 1 }}>
+          <Header2 onDataUpdate={handleDataFromChild} />{' '}
+          <>
+            {error && <p>{error}</p>}
+            {currentPosts &&
+  currentPosts.map((question, index) => (
+    <StyledQuestionRow key={index}>
+      <QuestionStat>
+        {typeof question.votes === 'number' ? question.votes : 0}
+        <span>votes</span>
+      </QuestionStat>
+      <QuestionStat>
+        {typeof question.answers === 'number' ? question.answers : 0}
+        <span>answers</span>
+      </QuestionStat>
+      <QuestionStat>
+        {typeof question.views === 'number' ? question.views : 0}
+        <span>views</span>
+      </QuestionStat>
+      <QuestionTitleArea>
+        <QuestionLink to={`/client/question/${question.id}`}>
+          {question.title || 'No title'}
+        </QuestionLink>
+        <p>{question.content}</p>
+      </QuestionTitleArea>
+    </StyledQuestionRow>
+  ))}
+
+
+            <Pagination
+              postsPerPage={postPerPage}
+              totalPosts={questionDatas.length}
+              paginate={paginate}
+            />
+          </>
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default QuestionsPage;

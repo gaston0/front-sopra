@@ -1,7 +1,7 @@
-import StyledHeader from "./homeComponents/Header1";
 import Navbar from "./homeComponents/Navbar";
 import styled from "styled-components";
 import { createGlobalStyle } from "styled-components";
+import NewNavbar from "./homeComponents/NewNavbar";
 
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
@@ -37,7 +37,8 @@ blockquote{
 }
 `
 const Container = styled.div`
-padding : 30px 20px
+
+padding : 70px 20px
 `;
 
 
@@ -45,9 +46,9 @@ function ProfilePage (){
     return(
         <>
         <GlobalStyle />
-        <Navbar />
+        <NewNavbar />
         <Container>
-        <StyledHeader>Profile Page</StyledHeader>
+        
         </Container>
         
         </>

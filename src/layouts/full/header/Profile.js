@@ -106,7 +106,7 @@ const [username, setUsername] = useState('');
                     <ListItemText>{username}</ListItemText>
                 </MenuItem>
             ) : (
-                <MenuItem component={Link} to="/other-page" >
+                <MenuItem component={Link} to="/client/profile" >
                 <ListItemIcon>
                         <IconUser width={20} />
                     </ListItemIcon>

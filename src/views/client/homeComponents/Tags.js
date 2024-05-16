@@ -110,10 +110,10 @@ export default function Tags() {
       preConfirm: () => {
         const name = document.getElementById('swal-input-name').value;
         const description = document.getElementById('swal-input-description').value;
-        return { name, description };
+        return { name, description }; // Ensure both name and description are returned
       },
     });
-
+  
     if (updatedTag) {
       try {
         await axios.put(`http://localhost:8080/api/tags/${tagId}`, updatedTag, {
@@ -122,14 +122,12 @@ export default function Tags() {
           },
         });
         Swal.fire('Tag updated successfully!', '', 'success');
-
-        // Update tags state correctly
+  
+        // Update only the tag's description
         setTags((prevTags) =>
           prevTags.map((tag) =>
-            tag.id === tagId
-              ? { ...tag, name: updatedTag.name, description: updatedTag.description }
-              : tag,
-          ),
+            tag.id === tagId ? { ...tag, description: updatedTag.description } : tag
+          )
         );
       } catch (error) {
         console.error('Error updating tag:', error.message);
@@ -137,6 +135,7 @@ export default function Tags() {
       }
     }
   };
+  
 
   return (
     <>
@@ -154,7 +153,7 @@ export default function Tags() {
                   <div className="main">
                     <h1 style={{ marginTop: '-20px' }}>Tags</h1>
                     <div className="mt-5">
-                      {userRole !== 'ROLE_USER' && userRole !== 'ROLE_ADMIN' && (
+                      {userRole !== 'ROLE_USER' || userRole !== 'ROLE_ADMIN' && (
                         <button
                           className="btn"
                           style={{ float: 'right', backgroundColor: '#cf022b', color: '#fff' }}
@@ -189,7 +188,7 @@ export default function Tags() {
                               <p className="card-text m-2">
                                 {tag.description ? tag.description.slice(0, 100) : ''}...
                               </p>
-                              {userRole !== 'ROLE_USER' && userRole !== 'ROLE_ADMIN' && (
+                              {userRole !== 'ROLE_USER' || userRole !== 'ROLE_ADMIN' && (
                                 <div style={{ position: 'absolute', bottom: '5px', right: '5px' }}>
                                   <FaTrash
                                     style={{ marginRight: '5px', cursor: 'pointer' }}

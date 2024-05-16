@@ -1,0 +1,64 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  header {
+    background-color: #f0f0f0;
+    padding: 20px 0;
+  }
+  
+  header h1 {
+    margin: 0;
+  }
+  
+  main {
+    padding: 20px 0;
+  }
+  
+  .profile-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #ccc; /* Placeholder background color */
+    margin-right: 20px;
+  }
+  
+  .user-details {
+    flex-grow: 1;
+  }
+  
+  .badges {
+    margin-top: 20px;
+  }
+  
+  .badge {
+    display: inline-block;
+    background-color: #ffd700; /* Gold color */
+    color: #fff;
+    padding: 5px 10px;
+    margin-right: 10px;
+    border-radius: 3px;
+  }
+  
+  .activity {
+    margin-top: 20px;
+  }
+  
+  footer {
+    background-color: #f0f0f0;
+    padding: 10px 0;
+    text-align: center;
+  }
+  

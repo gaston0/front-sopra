@@ -1,19 +1,18 @@
-import React ,{useEffect,useState}from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FilterList } from '@mui/icons-material';
 import axios from 'axios';
 import './Header2.css';
+import QuestionRow from '../homeComponents/QuestionsRow'; // Importez votre composant QuestionRow
 
-
-function Header2() {
+function Header2({ onDataUpdate,questionDatas  }) {
   const [questions, setQuestions] = useState([]);
-  const [activeFilter, setActiveFilter] = useState(''); // State to keep track of the active filter
+  const [activeFilter, setActiveFilter] = useState('');
 
   useEffect(() => {
-    fetchQuestions(); // Fetch questions when component mounts
-  }, [activeFilter]); // Refetch questions when active filter changes
+    fetchQuestions();
+  }, [activeFilter]);
 
-  // Function to fetch questions based on the selected filter
   const fetchQuestions = async () => {
     try {
       let response;
@@ -26,12 +25,12 @@ function Header2() {
       }
 
       setQuestions(response.data);
+      onDataUpdate(response.data);
     } catch (error) {
       console.error('Error fetching questions:', error);
     }
   };
 
-  // Function to handle filter change
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
   };
@@ -39,16 +38,10 @@ function Header2() {
   return (
     <div className="main" style={{ marginTop: '70px', width: 'auto' }}>
       <div className="main-container">
-        <div
-          className="main-top"
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-        >
+        <div className="main-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: '0', marginRight: 'auto' }}>All Questions</h2>
           <NavLink to="/client/askquestion">
-            <button
-              className="btn"
-              style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}
-            >
+            <button className="btn" style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}>
               Ask Question
             </button>
           </NavLink>
@@ -58,7 +51,8 @@ function Header2() {
           <div className="main-filter">
             <div className="main-tabs">
               <NavLink
-                to="/answered"
+
+                
                 className={`main-tab ${activeFilter === 'answered' ? 'active-tab' : ''}`}
                 onClick={() => handleFilterChange('answered')}
                 activeClassName="active-tab"
@@ -66,7 +60,7 @@ function Header2() {
                 Answered
               </NavLink>
               <NavLink
-                to="/votes"
+                
                 className={`main-tab ${activeFilter === 'votes' ? 'active-tab' : ''}`}
                 onClick={() => handleFilterChange('votes')}
                 activeClassName="active-tab"
@@ -74,7 +68,7 @@ function Header2() {
                 Votes
               </NavLink>
               <NavLink
-                to="/unanswered"
+                
                 className={`main-tab ${activeFilter === 'unanswered' ? 'active-tab' : ''}`}
                 onClick={() => handleFilterChange('unanswered')}
                 activeClassName="active-tab"
@@ -84,15 +78,12 @@ function Header2() {
             </div>
           </div>
         </div>
-
-        {/* Render questions based on the active filter */}
         <div>
-          {questions.map((question) => (
-            <div key={question.id}>{/* Render each question */}</div>
-          ))}
+          
         </div>
       </div>
     </div>
   );
 }
+
 export default Header2;
