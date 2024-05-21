@@ -1,0 +1,7 @@
+.active>.page-link{
+    background-color: gray;
+}
+
+.page-link{
+    text-decoration-color: white;
+}

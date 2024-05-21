@@ -55,3 +55,72 @@ p {
   margin: 10px 0;
   line-height: 1.5rem;
 }
+
+.blog-meta {
+  justify-content: space-between;
+  color: #555;
+  font-size: medium;
+}
+
+.blog-meta .author,
+.blog-meta .date {
+  margin-right: 15px;
+  
+}
+
+.blog-meta .author i,
+.blog-meta .date i {
+  margin-right: 5px;
+  color: #777;
+}
+
+.blog-meta .author {
+  font-weight: bold;
+}
+
+.blog-meta .date {
+  font-style: italic;
+}
+
+.title{
+  font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 30px;
+    color: #000000;
+}
+.content{
+  font-size: 15px;
+    line-height: 1.6;
+    color: #051922;
+}
+
+.tags .tag-container {
+  display: flex; /* Utilisation de flexbox pour disposer les tags */
+  flex-wrap: wrap; /* Permet aux tags de passer à la ligne lorsque l'espace est insuffisant */
+}
+
+.tag-item {
+  background-color: #d9d8db; /* Couleur de fond de chaque tag */
+  color: #333; /* Couleur du texte */
+  border-radius: 20px; /* Coins arrondis des tags */
+  padding: 5px 10px; /* Espacement interne des tags */
+  margin-right: 10px; /* Espacement entre les tags */
+  margin-bottom: 10px; /* Espacement en bas des tags */
+}
+
+.tag-item a.tagli {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: red; /* Couleur de l'icône */
+  margin-left: 5px; /* Espacement entre le tag et l'icône */
+}
+
+.cadre {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+}
+

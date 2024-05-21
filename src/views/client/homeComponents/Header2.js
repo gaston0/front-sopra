@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FilterList } from '@mui/icons-material';
 import axios from 'axios';
 import './Header2.css';
-import QuestionRow from '../homeComponents/QuestionsRow'; // Importez votre composant QuestionRow
 
 function Header2({ onDataUpdate,questionDatas  }) {
   const [questions, setQuestions] = useState([]);
@@ -25,6 +23,7 @@ function Header2({ onDataUpdate,questionDatas  }) {
       }
 
       setQuestions(response.data);
+      console.log(response.data);
       onDataUpdate(response.data);
     } catch (error) {
       console.error('Error fetching questions:', error);
@@ -47,7 +46,7 @@ function Header2({ onDataUpdate,questionDatas  }) {
           </NavLink>
         </div>
         <div className="main-desc">
-          <p>Questions</p>
+          <p>{}Questions</p>
           <div className="main-filter">
             <div className="main-tabs">
               <NavLink

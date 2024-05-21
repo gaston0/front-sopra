@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
-import Navbar from './homeComponents/Navbar';
-
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faUser, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import axios from 'axios';
 import './QuestionPageById.css';
+import NewNavbar from './homeComponents/NewNavbar';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
@@ -46,38 +48,44 @@ const Container = styled.div`
   padding: 30px 20px;
 `;
 
+const Cader = styled.div`
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+`;
+const Comment = styled.div`
+  background: #f2f2f1;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+`;
+
+const Separator = styled.hr`
+  border: none;
+  border-top: 1px solid #000000;
+  margin: 30px 0;
+`;
+
+const EditDeleteIcons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -20px;
+`;
+
+const Icon = styled.div`
+  margin-left: 10px;
+  cursor: pointer;
+`;
+
 function QuestionsPageById() {
   const [question, setQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
-  const [reply, setReply] = useState('');
-  const [replyToId, setReplyToId] = useState(null);
-  const replyRef = useRef(null);
   const { questionId } = useParams();
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const handleReplyClick = (answerId) => {
-    setReplyToId(answerId);
-    replyRef.current.scrollIntoView({ behavior: 'smooth' });
-  };
-  const handleReplySubmit = async (parentAnswerId, event) => {
-    event.preventDefault();
-
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `http://localhost:8080/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
-        { content: reply },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      setReply('');
-    } catch (error) {
-      console.error('Error posting reply:', error.message);
-    }
-  };
+  library.add(faUser, faCalendar);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -95,6 +103,7 @@ function QuestionsPageById() {
       );
 
       setAnswer('');
+      window.location.reload();
     } catch (error) {
       console.error('Error posting answer:', error.message);
     }
@@ -110,6 +119,7 @@ function QuestionsPageById() {
           },
         });
         setQuestion(response.data);
+        
       } catch (error) {
         console.error('Error fetching question data:', error.message);
       }
@@ -117,16 +127,62 @@ function QuestionsPageById() {
 
     fetchQuestionById();
   }, [questionId]);
-  if (question) {
-    console.log(question);
-    console.log(question.file);
-  }
+
+  const [replyToId, setReplyToId] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
+  const replyFormRef = useRef(null);
+
+  const handleReplyClick2 = (answerId) => {
+    setReplyToId(answerId);
+  };
+
+  const handleReplySubmit2 = async (parentAnswerId, event) => {
+    event.preventDefault();
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Gérer le cas où le token n'est pas disponible
+        console.error("Token d'authentification non disponible");
+        return;
+      }
+
+      const response = await axios.post(
+        `http://localhost:8080/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
+        { content: replyContent },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log('Réponse postée avec succès:', response.data);
+      setReplyContent('');
+      window.location.reload();
+    } catch (error) {
+      console.error('Erreur lors de la publication de la réponse:', error.message);
+    }
+  };
+
+  const handleClickOutside = (event) => {
+    if (replyFormRef.current && !replyFormRef.current.contains(event.target)) {
+      setReplyToId(null);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
-      <GlobalStyle />
-      <Navbar />
+      <NewNavbar />
       <Container>
+        <GlobalStyle />
         {question && (
           <div className="mt-150 mb-150">
             <div className="container">
@@ -139,96 +195,177 @@ function QuestionsPageById() {
                         <span className="author">
                           <i className="fas fa-user" />{' '}
                         </span>
-                        <span className="date">
-                          <i className="fas fa-calendar" />{' '}
-                          {new Date(question.createdAt).toLocaleDateString()}
-                        </span>
-                      </p>
-                      <h2>{question.title}</h2>
-                      <Markdown remarkPlugins={[remarkGfm]}>{question.content}</Markdown>
-                      <p>Créé le : {new Date(question.createdAt).toLocaleString()}</p>
-                      <p>
-                        Mis à jour le :{' '}
-                        {question.updatedAt
-                          ? new Date(question.updatedAt).toLocaleString()
-                          : 'Pas encore mis à jour'}
-                      </p>
-                      <p>Tags :</p>
-                      <ul>
-                        {question.tags.map((tag) => (
-                          <li key={tag.id}>{tag.name}</li>
-                        ))}
-                      </ul>
-                      <p>Réponses :</p>
-                      <ul>
-                        {question.answers.map((answer) => (
-                          <div key={answer.id}>
-                            <p>{answer.content}</p>
-                            <a href="#" onClick={() => handleReplyClick(answer.id)}>
-                              Reply
-                            </a>
+                        {question && question.file && (
+                          <div
+                            className="file"
+                            style={{
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              borderRadius: '5px',
+                              marginTop: '50px',
+                            }}
+                          >
+                            {question.contentType === 'application/pdf' && (
+                              <embed
+                                src={`data:application/pdf;base64,${question.file}`}
+                                type="application/pdf"
+                                width="800px"
+                                height="400px"
+                              />
+                            )}
+                            {question.contentType === 'image/jpeg' && (
+                              <embed
+                                src={`data:image/jpeg;base64,${question.file}`}
+                                type="image/jpeg"
+                                width="800px"
+                                height="400px"
+                              />
+                            )}
+                            {question.contentType === 'text/csv' && (
+                              <embed
+                                src={`data:text/csv;base64,${question.file}`}
+                                type="text/csv"
+                                width="800px"
+                                height="400px"
+                              />
+                            )}
                           </div>
-                        ))}
-                      </ul>
-
-                      {question && question.file && (
-                        <div>
-                          <p>File:</p>
-                          {question.contentType === 'application/pdf' && (
-                            <embed
-                              src={`data:application/pdf;base64,${question.file}`}
-                              type="application/pdf"
-                              width="50%"
-                              height="300px"
-                            />
-                          )}
-                          {question.contentType === 'image/jpeg' && (
-                            <embed
-                              src={`data:image/jpeg;base64,${question.file}`}
-                              type="image/jpeg"
-                              width="100%"
-                              height="600px"
-                            />
-                          )}
-                          {question.contentType === 'text/csv' && (
-                            <embed
-                              src={`data:text/csv;base64,${question.file}`}
-                              type="text/csv"
-                              width="100%"
-                              height="600px"
-                            />
-                          )}
+                        )}
+                        <p className="blog-meta">
+                          <span className="author">
+                            <FontAwesomeIcon icon="user" style={{ marginRight: '5px' }} />{' '}
+                            {question.userAnonymous ? 'Anonyme' : 'Admin'}
+                          </span>
+                          <span className="date">
+                            <FontAwesomeIcon icon="calendar" style={{ marginRight: '5px' }} />
+                            {new Date(question.createdAt).toLocaleDateString()}
+                          </span>
+                          <span>
+                            Mis à jour le :{' '}
+                            {question.updatedAt
+                              ? new Date(question.updatedAt).toLocaleString()
+                              : 'Pas encore mis à jour'}
+                          </span>
+                        </p>
+                      </p>
+                      <h2 className="title">{question.title}</h2>
+                      <p className="content">{question.content}</p>
+                      <div className="tags">
+                        <p className="tag">Tags :</p>
+                        <div className="tag-container">
+                          {question.tags.map((tag) => (
+                            <div key={tag.id} className="tag-item">
+                              {tag.name}
+                              <a className="tagli"></a>
+                            </div>
+                          ))}
                         </div>
-                      )}
+                      </div>
+                      <div className="comments-list-wrap">
+                        <h3 className="comment-count-title">
+                          {question.answers.length} response :
+                        </h3>
+
+                        <div className="comment-list">
+                          {question.answers.map((answer) => (
+                            <React.Fragment key={answer.id}>
+                              <div
+                                className="single-comment-body"
+                                style={{ marginTop: '10px', marginBottom: '10px' }}
+                              >
+                                <div className="comment-user-avatar"></div>
+                                <div className="comment-text-body">
+                                  <h4>
+                                    <FontAwesomeIcon
+                                      icon="user"
+                                      className="user-icon"
+                                      style={{ fontFamily: 'monospace', marginLeft: '50px' }}
+                                    />
+                                    <span style={{ marginLeft: '5px' }}>{answer.user}</span>
+                                    <span className="comment-date" style={{ marginLeft: '5px' }}>
+                                      A répondu le {new Date(answer.createdAt).toLocaleDateString()}
+                                    </span>{' '}
+                                    <button
+                                      style={{ marginTop: '5px', marginLeft: '10px' }}
+                                      type="button"
+                                      className="btn btn-outline-danger btn-sm"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handleReplyClick2(answer.id);
+                                      }}
+                                    >
+                                      reply
+                                    </button>
+                                  </h4>
+                                  <Cader>
+                                    <p style={{ color: 'black', paddingTop: '7px' }}>
+                                      {answer.content}
+                                    </p>
+                                  </Cader>
+                                  {replyToId === answer.id && (
+                                    <form
+                                      ref={replyFormRef}
+                                      onSubmit={(e) => handleReplySubmit2(answer.id, e)}
+                                      className="reply-form"
+                                    >
+                                      <textarea
+                                        value={replyContent}
+                                        onChange={(e) => setReplyContent(e.target.value)}
+                                        placeholder="Your reply"
+                                        cols="30"
+                                        rows="3"
+                                      />
+                                      <button
+                                        type="submit"
+                                        className="btn btn-danger btn-sm"
+                                        style={{ marginTop: '5px', marginBottom: '10px' }}
+                                      >
+                                        Submit
+                                      </button>
+                                    </form>
+                                  )}
+                                  <div>
+                                    {answer.responses.length > 0 && (
+                                      <div style={{ marginLeft: '20px' }}>
+                                        <h5>Replies:</h5>
+                                        {answer.responses.map((response) => (
+                                          <Comment key={response.id}>
+                                            <p>{response.content}</p>
+                                          </Comment>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <Separator />
+                            </React.Fragment>
+                          ))}
+                          <form onSubmit={handleSubmit}>
+                            <textarea
+                              value={answer}
+                              onChange={(e) => setAnswer(e.target.value)}
+                              placeholder="Your answer"
+                              cols="30"
+                              rows="3"
+                              style={{ width: '100%', marginBottom: '10px' }}
+                            />
+                            <button
+                              className="btn"
+                              style={{
+                                marginRight: '20px',
+                                backgroundColor: '#cf022b',
+                                color: '#fff',
+                              }}
+                            >
+                              Submit
+                            </button>
+                          </form>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <form onSubmit={handleSubmit}>
-                  <textarea
-                    name="comment"
-                    id="comment"
-                    cols={30}
-                    rows={10}
-                    placeholder="Your Message"
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                  />
-                  <input type="submit" value="Submit" />
-                </form>
-                <form onSubmit={(event) => handleReplySubmit(replyToId, event)}>
-                  <textarea
-                    ref={replyRef}
-                    name="reply"
-                    id="reply"
-                    cols={30}
-                    rows={10}
-                    placeholder="Your Reply"
-                    value={reply}
-                    onChange={(e) => setReply(e.target.value)}
-                  />
-                  <input type="submit" value="Reply" />
-                </form>
               </div>
             </div>
           </div>

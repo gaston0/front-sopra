@@ -43,6 +43,18 @@ const QuestionLink = styled(Link)`
   margin-bottom: 5px;
 `;
 
+const WhoAndWhen = styled.div`
+  display: inline-block;
+  color: #aaa;
+  font-size: 0.8rem;
+  float: right;
+  padding: 10px 0;
+`;
+
+const UserLink = styled.a`
+  color: #bc1434;
+`;
+
 const StyledQuestionRow = styled.div`
   background-color: rgba(0, 0, 0, 0.01);
   padding: 15px 15px 10px;
@@ -58,6 +70,17 @@ const QuestionsPage = () => {
   const [currentPage, setcurrentPage] = useState(1);
   const [questionDatas, setQuestionData] = useState([]);
   const [error, setError] = useState(null);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
 
   const votreToken = localStorage.getItem('token');
   const handlePageChange = (pageNumber) => {
@@ -77,6 +100,7 @@ const QuestionsPage = () => {
           tags: [],
           pageIndex: 0,
           pageSize: 40,
+          userAnonymous: null,
         }),
       });
 
@@ -121,34 +145,51 @@ const QuestionsPage = () => {
           <>
             {error && <p>{error}</p>}
             {currentPosts &&
-  currentPosts.map((question, index) => (
-    <StyledQuestionRow key={index}>
-      <QuestionStat>
-        {typeof question.votes === 'number' ? question.votes : 0}
-        <span>votes</span>
-      </QuestionStat>
-      <QuestionStat>
-        {typeof question.answers === 'number' ? question.answers : 0}
-        <span>answers</span>
-      </QuestionStat>
-      <QuestionStat>
-        {typeof question.views === 'number' ? question.views : 0}
-        <span>views</span>
-      </QuestionStat>
-      <QuestionTitleArea>
-        <QuestionLink to={`/client/question/${question.id}`}>
-          {question.title || 'No title'}
-        </QuestionLink>
-        <p>{question.content}</p>
-      </QuestionTitleArea>
-    </StyledQuestionRow>
-  ))}
-
+              currentPosts.map((question, index) => (
+                <StyledQuestionRow key={index}>
+                  <QuestionStat>
+                    {typeof question.votes === 'number' ? question.votes : 0}
+                    <span>votes</span>
+                  </QuestionStat>
+                  <QuestionStat>
+                    {typeof question.answers === 'number' ? question.answers : 0}
+                    <span>answers</span>
+                  </QuestionStat>
+                  <QuestionStat>
+                    {typeof question.views === 'number' ? question.views : 0}
+                    <span>views</span>
+                  </QuestionStat>
+                  <QuestionTitleArea>
+                    <QuestionLink to={`/client/question/${question.id}`}>
+                      {question.title || 'No title'}
+                    </QuestionLink>
+                    <div>
+                      {/* Map over the tags array and render Tag components */}
+                      {question.tags &&
+                        question.tags.map((tag, tagIndex) => <Tag key={tagIndex}>{tag}</Tag>)}
+                    </div>
+                    <WhoAndWhen>
+                      asked {formatDate(question.createdAt)} By{' '}
+                      {question.username && question.username != null && (
+                        <UserLink>
+                          <span>{question.username}</span>
+                        </UserLink>
+                      )}
+                      {question.username === null && (
+                        <UserLink>
+                          <span>Anonyme</span>
+                        </UserLink>
+                      )}
+                    </WhoAndWhen>
+                  </QuestionTitleArea>
+                </StyledQuestionRow>
+              ))}
 
             <Pagination
               postsPerPage={postPerPage}
               totalPosts={questionDatas.length}
               paginate={paginate}
+              currentPage={currentPage}
             />
           </>
         </div>
