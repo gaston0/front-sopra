@@ -119,7 +119,6 @@ function QuestionsPageById() {
           },
         });
         setQuestion(response.data);
-        
       } catch (error) {
         console.error('Error fetching question data:', error.message);
       }
@@ -251,8 +250,10 @@ function QuestionsPageById() {
                       <h2 className="title">{question.title}</h2>
                       <p className="content">{question.content}</p>
                       <div className="tags">
-                        <p className="tag">Tags :</p>
-                        <div className="tag-container">
+                        <p className="tag" style={{ color: 'black' }}>
+                          Tags :
+                        </p>
+                        <div className="tag-container" style={{ marginBottom: '5px' }}>
                           {question.tags.map((tag) => (
                             <div key={tag.id} className="tag-item">
                               {tag.name}
@@ -341,7 +342,10 @@ function QuestionsPageById() {
                               <Separator />
                             </React.Fragment>
                           ))}
-                          <form onSubmit={handleSubmit}>
+                          <span style={{ fontSize: '20px', color: 'black', marginBottom: '10px' }}>
+                            Make your answer with love :{' '}
+                          </span>
+                          <form onSubmit={handleSubmit} style={{ marginTop: '5px' }}>
                             <textarea
                               value={answer}
                               onChange={(e) => setAnswer(e.target.value)}

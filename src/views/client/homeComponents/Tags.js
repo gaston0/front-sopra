@@ -113,7 +113,7 @@ export default function Tags() {
         return { name, description }; // Ensure both name and description are returned
       },
     });
-  
+
     if (updatedTag) {
       try {
         await axios.put(`http://localhost:8080/api/tags/${tagId}`, updatedTag, {
@@ -122,12 +122,12 @@ export default function Tags() {
           },
         });
         Swal.fire('Tag updated successfully!', '', 'success');
-  
+
         // Update only the tag's description
         setTags((prevTags) =>
           prevTags.map((tag) =>
-            tag.id === tagId ? { ...tag, description: updatedTag.description } : tag
-          )
+            tag.id === tagId ? { ...tag, description: updatedTag.description } : tag,
+          ),
         );
       } catch (error) {
         console.error('Error updating tag:', error.message);
@@ -135,7 +135,6 @@ export default function Tags() {
       }
     }
   };
-  
 
   return (
     <>
@@ -153,15 +152,16 @@ export default function Tags() {
                   <div className="main">
                     <h1 style={{ marginTop: '-20px' }}>Tags</h1>
                     <div className="mt-5">
-                      {userRole !== 'ROLE_USER' || userRole !== 'ROLE_ADMIN' && (
-                        <button
-                          className="btn"
-                          style={{ float: 'right', backgroundColor: '#cf022b', color: '#fff' }}
-                          onClick={handleAddTag}
-                        >
-                          Ajouter Tag
-                        </button>
-                      )}
+                      {userRole !== 'ROLE_USER' ||
+                        (userRole !== 'ROLE_ADMIN' && (
+                          <button
+                            className="btn"
+                            style={{ float: 'right', backgroundColor: '#cf022b', color: '#fff' }}
+                            onClick={handleAddTag}
+                          >
+                            Ajouter Tag
+                          </button>
+                        ))}
                       A tag is a keyword or label that categorizes your question with other, similar
                       questions.
                       <br />
@@ -188,18 +188,21 @@ export default function Tags() {
                               <p className="card-text m-2">
                                 {tag.description ? tag.description.slice(0, 100) : ''}...
                               </p>
-                              {userRole !== 'ROLE_USER' || userRole !== 'ROLE_ADMIN' && (
-                                <div style={{ position: 'absolute', bottom: '5px', right: '5px' }}>
-                                  <FaTrash
-                                    style={{ marginRight: '5px', cursor: 'pointer' }}
-                                    onClick={() => handleDeleteTag(tag.id)}
-                                  />
-                                  <FaEdit
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={() => handleEditTag(tag.id)}
-                                  />
-                                </div>
-                              )}
+                              {userRole !== 'ROLE_USER' ||
+                                (userRole !== 'ROLE_ADMIN' && (
+                                  <div
+                                    style={{ position: 'absolute', bottom: '5px', right: '5px' }}
+                                  >
+                                    <FaTrash
+                                      style={{ marginRight: '5px', cursor: 'pointer' }}
+                                      onClick={() => handleDeleteTag(tag.id)}
+                                    />
+                                    <FaEdit
+                                      style={{ cursor: 'pointer' }}
+                                      onClick={() => handleEditTag(tag.id)}
+                                    />
+                                  </div>
+                                ))}
                             </div>
                           </div>
                         </div>

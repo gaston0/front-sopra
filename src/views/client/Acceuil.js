@@ -17,7 +17,7 @@ function Acceuil() {
     
     return (
         <>
-
+            <div style={{height:"auto"}}>
             <header Style="height:100%; margin-top:20vh; z-index:1; background-color:white">
 
                 <div className="container mt-5 text-center">
@@ -53,6 +53,7 @@ function Acceuil() {
                 </div>
 
             </footer>
+            </div>
         </>
 
 
