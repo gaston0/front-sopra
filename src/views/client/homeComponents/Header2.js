@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 import './Header2.css';
 
-function Header2({ onDataUpdate,questionDatas  }) {
+function Header2({ onDataUpdate, onAllQuestionsClick }) {
   const [questions, setQuestions] = useState([]);
   const [activeFilter, setActiveFilter] = useState('');
 
@@ -22,16 +22,46 @@ function Header2({ onDataUpdate,questionDatas  }) {
         response = await axios.get('http://localhost:8080/api/questions/votes');
       }
 
-      setQuestions(response.data);
-      console.log(response.data);
-      onDataUpdate(response.data);
+      if (response) {
+        // Extract question IDs
+        const questionIds = response.data.map(question => question.id);
+
+        // Fetch user details for each question
+        const questionsWithUsernames = await Promise.all(questionIds.map(async (questionId) => {
+          const questionResponse = await axios.get(`http://localhost:8080/api/questions/${questionId}`);
+          return questionResponse.data;
+        }));
+
+        setQuestions(questionsWithUsernames);
+        onDataUpdate(questionsWithUsernames);
+      }
     } catch (error) {
       console.error('Error fetching questions:', error);
     }
   };
 
   const handleFilterChange = (filter) => {
+    if (filter === activeFilter) {
+      onAllQuestionsClick();
+      setActiveFilter('');
+      return;
+    }
     setActiveFilter(filter);
+  };
+
+  const activeTabStyle = {
+    backgroundColor: '#cf022b',
+    color: '#fff',
+    padding: '10px',
+    borderRadius: '5px',
+    textDecoration: 'none'
+  };
+
+  const tabStyle = {
+    padding: '10px',
+    borderRadius: '5px',
+    textDecoration: 'none',
+    color: '#000'
   };
 
   return (
@@ -46,29 +76,20 @@ function Header2({ onDataUpdate,questionDatas  }) {
           </NavLink>
         </div>
         <div className="main-desc">
-          <p>{}Questions</p>
+          <p>Questions</p>
           <div className="main-filter">
             <div className="main-tabs">
               <NavLink
-
-                
                 className={`main-tab ${activeFilter === 'answered' ? 'active-tab' : ''}`}
+                style={activeFilter === 'answered' ? activeTabStyle : tabStyle}
                 onClick={() => handleFilterChange('answered')}
                 activeClassName="active-tab"
               >
                 Answered
               </NavLink>
               <NavLink
-                
-                className={`main-tab ${activeFilter === 'votes' ? 'active-tab' : ''}`}
-                onClick={() => handleFilterChange('votes')}
-                activeClassName="active-tab"
-              >
-                Votes
-              </NavLink>
-              <NavLink
-                
                 className={`main-tab ${activeFilter === 'unanswered' ? 'active-tab' : ''}`}
+                style={activeFilter === 'unanswered' ? activeTabStyle : tabStyle}
                 onClick={() => handleFilterChange('unanswered')}
                 activeClassName="active-tab"
               >
@@ -77,9 +98,7 @@ function Header2({ onDataUpdate,questionDatas  }) {
             </div>
           </div>
         </div>
-        <div>
-          
-        </div>
+        <div></div>
       </div>
     </div>
   );

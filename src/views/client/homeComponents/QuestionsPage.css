@@ -1,0 +1,37 @@
+.filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Aligner les éléments au début */
+  color: black;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  margin-right: 10px; /* Espacement entre les éléments */
+  flex: 1;
+}
+
+.filter-item span {
+  margin-bottom: 5px; /* Espacement entre l'étiquette et l'élément */
+  font-weight: bold; /* Rendre l'étiquette en gras pour plus de visibilité */
+}
+
+.filter-item input,
+.filter-item select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.filter-item select {
+  height: auto;
+}
+
+.filter-item select[multiple] {
+  height: auto;
+  background-color: #fff;
+  max-height: 200px; /* Limiter la hauteur de la liste déroulante multiple */
+  overflow-y: auto; /* Ajouter une barre de défilement si nécessaire */
+}

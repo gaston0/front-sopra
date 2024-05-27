@@ -4,8 +4,9 @@ import Sidebar from './sidebar';
 import NewNavbar from './NewNavbar';
 import Header2 from './Header2';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import Pagination from './pagination';
+import '../homeComponents/QuestionsPage.css';
+import axios from 'axios';
 
 const QuestionStat = styled.div`
   text-align: center;
@@ -70,6 +71,11 @@ const QuestionsPage = () => {
   const [currentPage, setcurrentPage] = useState(1);
   const [questionDatas, setQuestionData] = useState([]);
   const [error, setError] = useState(null);
+  const [tags, setTags] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [searchTitle, setSearchTitle] = useState('');
+  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -117,8 +123,6 @@ const QuestionsPage = () => {
   };
   useEffect(() => {
     fetchAllQuestions();
-    // FindFrequencyOfAns();
-    // fetchVotes();
   }, [votreToken]);
 
   const indexOfLastPost = currentPage * postPerPage;
@@ -128,21 +132,177 @@ const QuestionsPage = () => {
   const paginate = (pageNum) => setcurrentPage(pageNum);
 
   const handleDataFromChild = (data) => {
-    // Faire quelque chose avec les données reçues du composant enfant (Header2)
-    console.log('Données reçues du composant ahmed (Header2) :', data);
     setQuestionData(data);
-
-    // Tu peux faire ici tout traitement nécessaire avec les données du composant enfant
   };
 
+  const handleAllQuestionsClick = async () => {
+    try {
+      // Fetch all questions again
+      const response = await fetch('http://localhost:8080/api/questions/all', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: '',
+          content: '',
+          userId: null,
+          tags: [],
+          pageIndex: 0,
+          pageSize: 40,
+          userAnonymous: null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setQuestionData(data);
+      } else {
+        console.error('Data is not an array:');
+      }
+    } catch (error) {
+      console.error('There was an error fetching questions:', error);
+    }
+  };
+
+  // fonction pour avoi la liste of tags
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
+          headers: {
+            Authorization: `Bearer ${votreToken}`,
+          },
+        });
+        setTags(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des tags :', error.message);
+      }
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/users', {
+          headers: {
+            Authorization: `Bearer ${votreToken}`,
+          },
+        });
+        setUsers(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des utilisateurs :', error.message);
+      }
+    };
+
+    fetchTags();
+    fetchUsers();
+  }, []);
+
+  const handleSearch = async () => {
+    const requestData = {
+      content: '',
+      pageIndex: 0,
+      pageSize: 40,
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
+      title: searchTitle ? searchTitle : undefined,
+      userAnonymous: selectedUser === '',
+      userId: selectedUser ? parseInt(selectedUser, 10) : undefined,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/questions/all', requestData, {
+        headers: {
+          Authorization: `Bearer ${votreToken}`,
+        },
+      });
+      console.log('Résultats de la recherche :', response.data);
+    } catch (error) {
+      console.error('Erreur lors de la recherche :', error.message);
+    }
+  };
+
+  const handleTagChange = (event) => {
+    const options = event.target.options;
+    const selectedOptions = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) {
+        selectedOptions.push(options[i].value);
+      }
+    }
+    setSelectedTags(selectedOptions);
+  };
   return (
     <>
       <NewNavbar />
       <div style={{ display: 'flex' }}>
         <Sidebar />
         <div style={{ flex: 1 }}>
-          <Header2 onDataUpdate={handleDataFromChild} />{' '}
+          <Header2
+            onDataUpdate={handleDataFromChild}
+            onAllQuestionsClick={handleAllQuestionsClick}
+          />{' '}
           <>
+            <div
+              className="filter-container"
+              style={{
+                borderTop: 'solid 1px gray',
+                borderRight: 'solid 1px gray',
+                borderLeft: 'solid 1px gray',
+                paddingBottom: '20px',
+                paddingTop: 10,
+              }}
+            >
+              <div className="filter-item" style={{ marginLeft: '5px' }}>
+                <span style={{ color: '#000000' }}>Titre :</span>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Rechercher par titre..."
+                  value={searchTitle}
+                  onChange={(e) => setSearchTitle(e.target.value)}
+                  style={{ height: '35px' }}
+                />
+              </div>
+              <div className="filter-item">
+                <span style={{ color: '#000000' }}>Utilisateurs :</span>
+                <select
+                  id="userSelect"
+                  value={selectedUser}
+                  onChange={(e) => setSelectedUser(e.target.value)}
+                >
+                  <option value="">Aucun</option>
+                  {users.map((user) => (
+                    <option key={user.matricul} value={user.matricul}>
+                      {user.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-item">
+                <span style={{ color: '#000000' }}>Tags :</span>
+                <select id="tagsSelect" value={selectedTags} onChange={handleTagChange}>
+                  {tags.map((tag) => (
+                    <option key={tag.id} value={tag.id}>
+                      {tag.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-item">
+                <button
+                  onClick={handleSearch}
+                  className="btn btn-outline-danger"
+                  style={{
+                    marginRight: '20px',
+                    marginLeft: '30px',
+                    marginTop: '23px',
+                  }}
+                >
+                  Rechercher
+                </button>
+              </div>
+            </div>
             {error && <p>{error}</p>}
             {currentPosts &&
               currentPosts.map((question, index) => (
@@ -164,9 +324,10 @@ const QuestionsPage = () => {
                       {question.title || 'No title'}
                     </QuestionLink>
                     <div>
-                      {/* Map over the tags array and render Tag components */}
                       {question.tags &&
-                        question.tags.map((tag, tagIndex) => <Tag key={tagIndex}>{tag}</Tag>)}
+                        question.tags.map((tag, tagIndex) => (
+                          <Tag key={tagIndex}>{typeof tag === 'object' ? tag.name : tag}</Tag>
+                        ))}
                     </div>
                     <WhoAndWhen>
                       asked {formatDate(question.createdAt)} By{' '}

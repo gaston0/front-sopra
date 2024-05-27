@@ -95,15 +95,8 @@ button{
     border-bottom: 1px solid #eee;
     width: 100%;
 }
-.custom-btn {
-    background-color: #cf022b;
-    border-color: #cf022b;
-  }
+
   
-  .custom-btn:hover {
-    background-color: #cf022b;
-    border-color: #cf022b;
-  }
 /* @media screen and (min-width: 768px){
     .main{
         flex: 0.6;

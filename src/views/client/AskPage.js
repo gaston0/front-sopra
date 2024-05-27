@@ -197,7 +197,7 @@ const AskPage = () => {
                 Rester anonyme
               </label>
             </div>
-            <button type="submit" className="btn btn-danger custom-btn mt-5 mb-5">
+            <button type="submit" className="btn  mt-5 mb-5"  style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}>
               Ask Question
             </button>
           </form>
