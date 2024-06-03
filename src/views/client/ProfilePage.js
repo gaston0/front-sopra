@@ -1,8 +1,13 @@
-import Navbar from "./homeComponents/Navbar";
-import styled from "styled-components";
-import { createGlobalStyle } from "styled-components";
-import NewNavbar from "./homeComponents/NewNavbar";
-
+import styled from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
+import NewNavbar from './homeComponents/NewNavbar';
+import './UserProfile.css';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import Swal from 'sweetalert2';
+import { Link } from 'react-router-dom';
+ 
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
 body{
@@ -11,7 +16,7 @@ body{
     font-family : Plus Jakarta Sans,sans-serif;
 }
 b,strong{
-    
+   
 }
 a{
     color : #fff;
@@ -35,25 +40,265 @@ blockquote{
     padding : 15px;
     border-radius : 4px;
 }
-`
-const Container = styled.div`
-
-padding : 70px 20px
 `;
-
-
-function ProfilePage (){
-    return(
-        <>
-        <GlobalStyle />
-        <NewNavbar />
-        <Container>
-        
-        </Container>
-        
-        </>
-    )
-
+const Container = styled.div`
+  padding: 70px 20px;
+`;
+ 
+function ProfilePage() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    prenom: '',
+    nom: '',
+    email: '',
+    username: '',
+    password: '',
+  });
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+ 
+  useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem('user')) || {
+      username: '',
+      email: '',
+      nom: '',
+      prenom: '',
+    };
+    setFormData(storedUserData);
+  }, []);
+ 
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+ 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+ 
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const accessToken = userData?.accessToken;
+    const userId = userData?.id;
+ 
+    function getUserRole() {
+      const user = JSON.parse(localStorage.getItem('user')); // Assurez-vous que l'objet utilisateur est bien stocké en JSON
+      return user?.roles?.includes('ROLE_MODERATOR') ? 'moderator' : 'user';
+    }
+ 
+    if (!accessToken) {
+      console.error('Access token is missing from localStorage');
+      return;
+    }
+ 
+    if (!userId) {
+      console.error('User ID is missing from localStorage');
+      return;
+    }
+ 
+    if (
+      !formData.prenom.trim() ||
+      !formData.nom.trim() ||
+      !formData.email.trim() ||
+      !formData.username.trim()
+    ) {
+      setErrorMessage('All fields are required');
+      return;
+    }
+ 
+    try {
+      const role = getUserRole();
+ 
+      // Ajoutez les rôles en fonction du rôle de l'utilisateur
+      const roles = role === 'mod' ? [{ name: 'ROLE_MODERATOR' }] : [{ name: 'ROLE_USER' }];
+ 
+      const response = await axios.put(
+        `http://localhost:8082/api/user/${userId}`,
+        {
+          ...formData,
+          roles: roles, // Utilisez le rôle déterminé
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+ 
+      setSuccessMessage('Profile updated successfully');
+      setErrorMessage('');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'User-Profil updated successfully!',
+      });
+ 
+      // Exclure le mot de passe lors de la sauvegarde dans le local storage
+      const { password, ...userDataWithoutPassword } = formData;
+      localStorage.setItem('user', JSON.stringify(userDataWithoutPassword));
+      window.location.reload();
+    } catch (error) {
+      setErrorMessage('Error updating profile');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An error occurred while updating the profile. Please try again later.',
+      });
+    }
+  };
+ 
+ 
+  return (
+    <>
+      <GlobalStyle />
+      <NewNavbar />
+      <Container style={{ marginTop: '20px' }}>
+        <div className="container">
+          <div className="row gutters">
+            <div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+              <div className="card h-100">
+                <div className="card-body">
+                  <div className="account-settings">
+                    <div className="user-profile">
+                      <div className="user-avatar">
+                        <img
+                          src="https://bootdey.com/img/Content/avatar/avatar7.png"
+                          alt="Maxwell Admin"
+                        />
+                      </div>
+                      <h5 className="user-name">{formData.username}</h5>
+                      <h6 className="user-email">{formData.email}</h6>
+                    </div>
+                    <div className="about">
+                      <h5 style={{ color: '#cf022b' }}>About</h5>
+                      <p>
+                        I'm {formData.username}. Full Stack Designer I enjoy creating user-centric,
+                        delightful and human experiences.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
+              <div className="card h-100">
+                <div className="card-body">
+                  <div className="row gutters">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                      <h6 className="mb-2 text" style={{ color: '#cf022b' }}>
+                        Personal Details
+                      </h6>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                      <div className="form-group">
+                        <label htmlFor="username">Username</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="username"
+                          name="username"
+                          placeholder="Enter your new username"
+                          value={formData.username}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                      <div className="form-group">
+                        <label htmlFor="email">Email</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          id="email"
+                          name="email"
+                          placeholder="Enter email ID"
+                          value={formData.email}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                      <div className="form-group">
+                        <label htmlFor="nom">Nom</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="nom"
+                          name="nom"
+                          placeholder="Enter your new nom"
+                          value={formData.nom}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                      <div className="form-group">
+                        <label htmlFor="prenom">Prenom</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          id="prenom"
+                          name="prenom"
+                          placeholder="Enter your new prenom"
+                          value={formData.prenom}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row gutters">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                      <h6 className="mt-3 mb-2 text" style={{ color: '#cf022b' }}>
+                        Password
+                      </h6>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                      <div className="form-group">
+                        <label htmlFor="password">New Password</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          id="password"
+                          name="password"
+                          placeholder="Enter your new password"
+                          value={formData.password}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row gutters" style={{ marginTop: '20px' }}>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                      <div className="text-right" style={{ spaceBetween: '1px' }}>
+                        <Link
+                          to="/client/questionpage"
+                          className="btn btn-secondary"
+                          style={{ marginRight: '10px' }}
+                        >
+                          Cancel
+                        </Link>
+                        <button
+                          type="button"
+                          className="btn"
+                          style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}
+                          onClick={handleSubmit}
+                        >
+                          Update
+                        </button>
+                      </div>
+                      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </>
+  );
 }
-
+ 
 export default ProfilePage;

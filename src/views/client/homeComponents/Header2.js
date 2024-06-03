@@ -3,28 +3,28 @@ import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 import './Header2.css';
 
-function Header2({ onDataUpdate,questionDatas  }) {
-  const [questions, setQuestions] = useState([]);
+function Header2({ onDataUpdate  }) {
   const [activeFilter, setActiveFilter] = useState('');
 
   useEffect(() => {
     fetchQuestions();
+    console.log('response',onDataUpdate);
   }, [activeFilter]);
 
   const fetchQuestions = async () => {
     try {
       let response;
       if (activeFilter === 'answered') {
-        response = await axios.get('http://localhost:8080/api/questions/questionsWithAnswers');
+        response = await axios.get('http://localhost:8082/api/questions/questionsWithAnswers');
       } else if (activeFilter === 'unanswered') {
-        response = await axios.get('http://localhost:8080/api/questions/questionsWithoutAnswers');
+        response = await axios.get('http://localhost:8082/api/questions/questionsWithoutAnswers');
       } else if (activeFilter === 'votes') {
-        response = await axios.get('http://localhost:8080/api/questions/votes');
+        response = await axios.get('http://localhost:8082/api/questions/votes');
       }
 
-      setQuestions(response.data);
-      console.log(response.data);
-      onDataUpdate(response.data);
+      const questions = response.data;
+      console.log('response',response.data);
+      onDataUpdate(questions); // Envoyer les données mises à jour au parent
     } catch (error) {
       console.error('Error fetching questions:', error);
     }

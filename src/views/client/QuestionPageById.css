@@ -109,13 +109,7 @@ p {
   margin-bottom: 10px; /* Espacement en bas des tags */
 }
 
-.tag-item a.tagli {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  background-color: red; /* Couleur de l'icône */
-  margin-left: 5px; /* Espacement entre le tag et l'icône */
-}
+
 
 .cadre {
   border: 1px solid #ccc;

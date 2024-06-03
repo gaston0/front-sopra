@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faCalendar, faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import axios from 'axios';
 import './QuestionPageById.css';
 import NewNavbar from './homeComponents/NewNavbar';
+import { Alert } from 'bootstrap';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
@@ -84,7 +85,12 @@ function QuestionsPageById() {
   const [answer, setAnswer] = useState('');
   const { questionId } = useParams();
   const [currentUser, setCurrentUser] = useState(null);
+  const [voteValue, setVoteValue] = useState(null);
+  const [totalVote,setTotalVote]= useState(null);
+  const userObject = JSON.parse(localStorage.getItem('user'));
+  const userId = userObject ? userObject.id : null;
 
+  
   library.add(faUser, faCalendar);
 
   const handleSubmit = async (event) => {
@@ -93,7 +99,7 @@ function QuestionsPageById() {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:8080/api/questions/${questionId}/answers`,
+        `http://localhost:8082/api/questions/${questionId}/answers`,
         { content: answer },
         {
           headers: {
@@ -109,24 +115,56 @@ function QuestionsPageById() {
     }
   };
 
+
+  const fetchQuestionById = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:8082/api/questions/${questionId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setQuestion(response.data);
+    } catch (error) {
+      console.error('Error fetching question data:', error.message);
+    }
+  };
+
+
+  const fetchVote = async () => {
+
+    const entityType = 'Question';
+    const entityId = questionId
+  axios.get(`http://localhost:8082/api/votes/status`, {
+    params: {
+      entityType,
+      entityId,
+      userId
+    }
+  })
+  .then(response => {
+    setVoteValue(response.data.value);
+    setTotalVote(response.data.totalVotes)
+  })
+  .catch(error => {
+    console.error('There was an error fetching the vote status!', error);
+  });
+  }
   useEffect(() => {
-    const fetchQuestionById = async () => {
+  
+    const incrementView = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8080/api/questions/${questionId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setQuestion(response.data);
-        
+        await axios.put(`http://localhost:8082/api/questions/${questionId}/increment-view`);
+        console.log("View count incremented successfully.");
       } catch (error) {
-        console.error('Error fetching question data:', error.message);
+        console.error("Error incrementing view count:", error);
       }
     };
-
+  
+    incrementView();
+    fetchVote();
     fetchQuestionById();
-  }, [questionId]);
+  }, [questionId,]);
 
   const [replyToId, setReplyToId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
@@ -148,7 +186,7 @@ function QuestionsPageById() {
       }
 
       const response = await axios.post(
-        `http://localhost:8080/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
+        `http://localhost:8082/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
         { content: replyContent },
         {
           headers: {
@@ -165,6 +203,25 @@ function QuestionsPageById() {
     }
   };
 
+
+  const handleVote = (value) => {
+    axios.post(`http://localhost:8082/api/votes/Question/${questionId}`, null, {
+      params: {
+        userId,
+        value
+      }
+    })
+    .then(response => {
+      console.log(response.data);
+      setVoteValue(value);
+
+      alert(response.data);
+      window.location.reload()// Update the vote value state
+    })
+    .catch(error => {
+      console.error('There was an error!', error);
+    });
+  };
   const handleClickOutside = (event) => {
     if (replyFormRef.current && !replyFormRef.current.contains(event.target)) {
       setReplyToId(null);
@@ -213,6 +270,15 @@ function QuestionsPageById() {
                                 height="400px"
                               />
                             )}
+
+{question.contentType === 'image/png' && (
+                              <embed
+                                src={`data:image/png;base64,${question.file}`}
+                                type="image/png"
+                                width="800px"
+                                height="400px"
+                              />
+                            )}
                             {question.contentType === 'image/jpeg' && (
                               <embed
                                 src={`data:image/jpeg;base64,${question.file}`}
@@ -231,10 +297,30 @@ function QuestionsPageById() {
                             )}
                           </div>
                         )}
+
                         <p className="blog-meta">
+                        <span>
+        <FontAwesomeIcon
+          icon={faThumbsUp}
+          onClick={() => handleVote(1)}
+          style={{ cursor: voteValue === 1 ? 'default' : 'pointer', color: voteValue === 1 ? 'green' : 'black' }}
+          disabled={voteValue === 1}
+        />
+
+        <span className='mx-4'>{totalVote}</span>
+        {!voteValue  && 
+        <span className='mx-4'>0</span>
+        }
+        <FontAwesomeIcon
+          icon={faThumbsDown}
+          onClick={() => handleVote(0)}
+          style={{ cursor: voteValue === 0 ? 'default' : 'pointer', color: voteValue === 0 ? 'red' : 'black' }}
+          disabled={voteValue === 0}
+        />
+      </span>
                           <span className="author">
                             <FontAwesomeIcon icon="user" style={{ marginRight: '5px' }} />{' '}
-                            {question.userAnonymous ? 'Anonyme' : 'Admin'}
+                            {question.userAnonymous ? 'Anonyme' : 'Utilisateur'}
                           </span>
                           <span className="date">
                             <FontAwesomeIcon icon="calendar" style={{ marginRight: '5px' }} />
@@ -248,6 +334,8 @@ function QuestionsPageById() {
                           </span>
                         </p>
                       </p>
+
+
                       <h2 className="title">{question.title}</h2>
                       <p className="content">{question.content}</p>
                       <div className="tags">
@@ -302,6 +390,25 @@ function QuestionsPageById() {
                                       {answer.content}
                                     </p>
                                   </Cader>
+                                  <span>
+        <FontAwesomeIcon
+          icon={faThumbsUp}
+          onClick={() => handleVote(1)}
+          style={{ cursor: voteValue === 1 ? 'default' : 'pointer', color: voteValue === 1 ? 'green' : 'black' }}
+          disabled={voteValue === 1}
+        />
+
+        
+        <span className='mx-4'>{totalVote}</span>
+        
+      
+        <FontAwesomeIcon
+          icon={faThumbsDown}
+          onClick={() => handleVote(0)}
+          style={{ cursor: voteValue === 0 ? 'default' : 'pointer', color: voteValue === 0 ? 'red' : 'black' }}
+          disabled={voteValue === 0}
+        />
+      </span>
                                   {replyToId === answer.id && (
                                     <form
                                       ref={replyFormRef}
@@ -365,6 +472,8 @@ function QuestionsPageById() {
                       </div>
                     </div>
                   </div>
+
+
                 </div>
               </div>
             </div>
