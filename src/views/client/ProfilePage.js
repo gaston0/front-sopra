@@ -63,17 +63,16 @@ function ProfilePage() {
       email: '',
       nom: '',
       prenom: '',
-      password: '',
     };
     setFormData(storedUserData);
   }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -82,6 +81,11 @@ function ProfilePage() {
     const userData = JSON.parse(localStorage.getItem('user'));
     const accessToken = userData?.accessToken;
     const userId = userData?.id;
+
+    function getUserRole() {
+      const user = JSON.parse(localStorage.getItem('user')); // Assurez-vous que l'objet utilisateur est bien stocké en JSON
+      return user?.roles?.includes('ROLE_MODERATOR') ? 'moderator' : 'user';
+    }
 
     if (!accessToken) {
       console.error('Access token is missing from localStorage');
@@ -97,19 +101,23 @@ function ProfilePage() {
       !formData.prenom.trim() ||
       !formData.nom.trim() ||
       !formData.email.trim() ||
-      !formData.username.trim() ||
-      !formData.password.trim()
+      !formData.username.trim()
     ) {
       setErrorMessage('All fields are required');
       return;
     }
 
     try {
+      const role = getUserRole();
+
+      // Ajoutez les rôles en fonction du rôle de l'utilisateur
+      const roles = role === 'mod' ? [{ name: 'ROLE_MODERATOR' }] : [{ name: 'ROLE_USER' }];
+
       const response = await axios.put(
         `http://localhost:8080/api/user/${userId}`,
         {
           ...formData,
-          roles: [{ name: 'ROLE_USER' }], // Ajoutez ce champ pour envoyer les rôles correctement
+          roles: roles, // Utilisez le rôle déterminé
         },
         {
           headers: {
@@ -125,7 +133,10 @@ function ProfilePage() {
         title: 'Success',
         text: 'User-Profil updated successfully!',
       });
-      localStorage.setItem('user', JSON.stringify(formData));
+
+      // Exclure le mot de passe lors de la sauvegarde dans le local storage
+      const { password, ...userDataWithoutPassword } = formData;
+      localStorage.setItem('user', JSON.stringify(userDataWithoutPassword));
       window.location.reload();
     } catch (error) {
       setErrorMessage('Error updating profile');
@@ -136,6 +147,7 @@ function ProfilePage() {
       });
     }
   };
+
 
   return (
     <>

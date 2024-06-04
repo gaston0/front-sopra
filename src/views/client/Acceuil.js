@@ -17,10 +17,10 @@ function Acceuil() {
     
     return (
         <>
-            <div style={{height:"100%"}}>
-            <header Style="height:100%; margin-top:20vh; z-index:1; background-color:white">
+            <div >
+            <header Style="height:60px; margin-top:20vh; z-index:1; background-color:white">
 
-                <div className="container mt-5 text-center">
+                <div className="container mt-1 text-center">
                     <div className="row">
 
 
@@ -45,7 +45,7 @@ function Acceuil() {
 
             </header>
 
-            <footer className="text-center text-lg-start" Style="background-color: #5c5c5c; position:absolute; bottom:0vh;width:100%;">
+            <footer className="text-center text-lg-start" Style="background-color: #5c5c5c; position:absolute; bottom:0vh;width:100%;margin-top:-14px">
 
                 <div className="text-center text-white p-3" Style="background-color: #282828;">
                     © 2024 Made With ❤ SopraQR

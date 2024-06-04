@@ -35,3 +35,10 @@
   max-height: 200px; /* Limiter la hauteur de la liste déroulante multiple */
   overflow-y: auto; /* Ajouter une barre de défilement si nécessaire */
 }
+
+
+
+/* Change la couleur de l'étoile en dorée au survol */
+.favorite-icon:hover {
+  color: gold;
+}

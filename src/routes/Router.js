@@ -10,6 +10,7 @@ import QuestionsPage from 'src/views/client/homeComponents/QuestionsPage';
 import Tags from 'src/views/client/homeComponents/Tags';
 import AjouterModerateur from 'src/views/sample-page/AjouterModerateur';
 import UserProfile from 'src/views/client/UserProfile';
+import Customers from 'src/views/client/Customers';
 
 
 
@@ -75,7 +76,7 @@ const Router = [
       {path:  '/client/questionpage', element:<QuestionsPage />},
       { path: '/client/profile', element: <ProfilePage /> },
       { path: '/client/question/:questionId', element: <QuestionsPageById /> },
-
+      { path: '/client/Customers', element: <Customers /> },
       { path: '/client/tags', element: <Tags /> },
       {path : '/client/profile', element: <UserProfile />}
 

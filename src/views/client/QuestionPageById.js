@@ -9,6 +9,7 @@ import remarkGfm from 'remark-gfm';
 import axios from 'axios';
 import './QuestionPageById.css';
 import NewNavbar from './homeComponents/NewNavbar';
+import Swal from 'sweetalert2';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
@@ -103,6 +104,11 @@ function QuestionsPageById() {
       );
 
       setAnswer('');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Response created successfully!',
+      });
       window.location.reload();
     } catch (error) {
       console.error('Error posting answer:', error.message);
@@ -157,7 +163,13 @@ function QuestionsPageById() {
       );
 
       console.log('Réponse postée avec succès:', response.data);
+
       setReplyContent('');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Reply created successfully!',
+      });
       window.location.reload();
     } catch (error) {
       console.error('Erreur lors de la publication de la réponse:', error.message);

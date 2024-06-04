@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import './sidebar.css';
-import { BsEscape,BsTagFill } from 'react-icons/bs';
-import {  BsQuestionCircleFill } from 'react-icons/bs'; // For "tag" and "question" icons
-
-
+import { BsEscape, BsTagFill,BsStar,BsPerson, BsTag, BsQuestionCircle } from 'react-icons/bs';
+import { BsQuestionCircleFill } from 'react-icons/bs'; // For "tag" and "question" icons
 
 const SidebarOption = ({ title, children }) => {
   return (
@@ -35,26 +33,30 @@ const Sidebar = () => {
           </a>
           <hr />
           <ul className="nav nav-pills flex-column mb-auto pt-3">
-
-          <li>
-  <a href="/client/questionpage" className="nav-link link-dark">
-  <BsQuestionCircleFill className="me-2" style={{ fontSize: '1.5rem' }} />
-    Question
-  </a>
-</li>
-<li>
-  <a href="/client/tags" className="nav-link link-dark">
-  <BsTagFill className="me-2" style={{ fontSize: '1.5rem' }} />
-
-    Tags
-  </a>
-</li>
-<li>
-  <a href="#" className="nav-link link-dark">
-    <BsEscape className="me-2" style={{ fontSize: '1.5rem' }} /> {/* Add styling */}
-    Customers
-  </a>
-</li>
+            <li>
+              <a href="/client/questionpage" className="nav-link link-dark">
+                <BsQuestionCircle className="me-2" style={{ fontSize: '1.5rem' }} />
+                Question
+              </a>
+            </li>
+            <li>
+              <a href="/client/tags" className="nav-link link-dark">
+                <BsTag className="me-2" style={{ fontSize: '1.5rem' }} />
+                Tags
+              </a>
+            </li>
+            <li>
+              <a href="/client/Customers" className="nav-link link-dark">
+                <BsPerson className="me-2" style={{ fontSize: '1.5rem' }} /> 
+                Customers
+              </a>
+            </li>
+            <li>
+              <a href="#" className="nav-link link-dark">
+                <BsStar className="me-2" style={{ fontSize: '1.5rem' }} /> 
+                <span style={{paddingTop:"6px"}}>Favoris</span>
+              </a>
+            </li>
           </ul>
           <hr />
         </div>

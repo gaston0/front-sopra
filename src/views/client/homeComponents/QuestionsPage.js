@@ -7,6 +7,9 @@ import { Link } from 'react-router-dom';
 import Pagination from './pagination';
 import '../homeComponents/QuestionsPage.css';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar } from '@fortawesome/free-solid-svg-icons';
 
 const QuestionStat = styled.div`
   text-align: center;
@@ -66,7 +69,6 @@ const StyledQuestionRow = styled.div`
 `;
 
 const QuestionsPage = () => {
-  const [questions, setQuestions] = useState([]);
   const [postPerPage] = useState(4);
   const [currentPage, setcurrentPage] = useState(1);
   const [questionDatas, setQuestionData] = useState([]);
@@ -76,6 +78,8 @@ const QuestionsPage = () => {
   const [searchTitle, setSearchTitle] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [requestData, setRequestData] = useState({});
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -89,9 +93,34 @@ const QuestionsPage = () => {
   };
 
   const votreToken = localStorage.getItem('token');
-  const handlePageChange = (pageNumber) => {
-    setcurrentPage(pageNumber);
+
+  
+
+  const handleFavoriteQuestion = async (questionId) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/api/favorites/markQuestionAsFavorite/${questionId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${votreToken}`,
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        Swal.fire('Question ajoutée comme favoris', '', 'success');
+        setIsFavorite(response); // Assurez-vous que cette fonction est correctement implémentée
+        console.log(response);
+      } else {
+        Swal.fire('Erreur dans l\'ajout', '', 'error');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la requête pour marquer la question comme favori :', error);
+    }
   };
+  
+
   const fetchAllQuestions = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/questions/all', {
@@ -135,22 +164,29 @@ const QuestionsPage = () => {
     setQuestionData(data);
   };
 
-  const handleAllQuestionsClick = async () => {
+  const handleAllQuestionsClick = async (
+    title,
+    content,
+    userId,
+    tags,
+    pageIndex,
+    pageSize,
+    userAnonymous,
+  ) => {
     try {
-      // Fetch all questions again
       const response = await fetch('http://localhost:8080/api/questions/all', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: '',
-          content: '',
-          userId: null,
-          tags: [],
-          pageIndex: 0,
-          pageSize: 40,
-          userAnonymous: null,
+          title: title || '',
+          content: content || '',
+          userId: userId || null,
+          tags: tags || [],
+          pageIndex: pageIndex || 0,
+          pageSize: pageSize || 40,
+          userAnonymous: userAnonymous || null,
         }),
       });
 
@@ -166,7 +202,57 @@ const QuestionsPage = () => {
     }
   };
 
-  // fonction pour avoi la liste of tags
+  useEffect(() => {
+    fetchAllQuestions();
+  }, [votreToken]);
+
+  const handleSearch = async () => {
+    if (!searchTitle && !selectedUser && selectedTags.length === 0) {
+      fetchAllQuestions();
+      return;
+    }
+
+    const requestData = {
+      content: '',
+      pageIndex: 0,
+      pageSize: 15,
+    };
+
+    if (Array.isArray(selectedTags) && selectedTags.length > 0) {
+      if (selectedTags.every((tag) => typeof tag === 'string')) {
+        requestData.tags = selectedTags;
+      } else {
+        console.error('selectedTags ne contient pas les données attendues.');
+        return;
+      }
+    }
+
+    if (searchTitle) {
+      requestData.title = searchTitle;
+    }
+
+    if (selectedUser === 'Anonyme') {
+      requestData.username = null;
+    } else if (selectedUser) {
+      requestData.userId = parseInt(selectedUser, 10);
+    }
+
+    console.log('Request Data:', requestData);
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/questions/all', requestData, {
+        headers: {
+          Authorization: `Bearer ${votreToken}`,
+        },
+      });
+
+      setQuestionData(response.data);
+      console.log('Résultats de la recherche :');
+    } catch (error) {
+      console.error('Erreur lors de la recherche :', error.message);
+    }
+  };
+
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -189,7 +275,7 @@ const QuestionsPage = () => {
           },
         });
         setUsers(response.data);
-        console.log(response.data);
+        
       } catch (error) {
         console.error('Erreur lors de la récupération des utilisateurs :', error.message);
       }
@@ -197,30 +283,7 @@ const QuestionsPage = () => {
 
     fetchTags();
     fetchUsers();
-  }, []);
-
-  const handleSearch = async () => {
-    const requestData = {
-      content: '',
-      pageIndex: 0,
-      pageSize: 40,
-      tags: selectedTags.length > 0 ? selectedTags : undefined,
-      title: searchTitle ? searchTitle : undefined,
-      userAnonymous: selectedUser === '',
-      userId: selectedUser ? parseInt(selectedUser, 10) : undefined,
-    };
-
-    try {
-      const response = await axios.post('http://localhost:8080/api/questions/all', requestData, {
-        headers: {
-          Authorization: `Bearer ${votreToken}`,
-        },
-      });
-      console.log('Résultats de la recherche :', response.data);
-    } catch (error) {
-      console.error('Erreur lors de la recherche :', error.message);
-    }
-  };
+  }, [votreToken]);
 
   const handleTagChange = (event) => {
     const options = event.target.options;
@@ -231,7 +294,9 @@ const QuestionsPage = () => {
       }
     }
     setSelectedTags(selectedOptions);
+    
   };
+
   return (
     <>
       <NewNavbar />
@@ -249,6 +314,8 @@ const QuestionsPage = () => {
                 borderTop: 'solid 1px gray',
                 borderRight: 'solid 1px gray',
                 borderLeft: 'solid 1px gray',
+                
+
                 paddingBottom: '20px',
                 paddingTop: 10,
               }}
@@ -271,19 +338,21 @@ const QuestionsPage = () => {
                   value={selectedUser}
                   onChange={(e) => setSelectedUser(e.target.value)}
                 >
-                  <option value="">Aucun</option>
+                  <option value="">Tous les utilisateurs</option>
+                  <option value="Anonyme">Anonyme</option>
                   {users.map((user) => (
                     <option key={user.matricul} value={user.matricul}>
-                      {user.nom}
+                      {user.username}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="filter-item">
                 <span style={{ color: '#000000' }}>Tags :</span>
-                <select id="tagsSelect" value={selectedTags} onChange={handleTagChange}>
+
+                <select id="tagsSelect" value={selectedTags} multiple onChange={handleTagChange}>
                   {tags.map((tag) => (
-                    <option key={tag.id} value={tag.id}>
+                    <option key={tag.name} value={tag.name}>
                       {tag.name}
                     </option>
                   ))}
@@ -307,28 +376,31 @@ const QuestionsPage = () => {
             {currentPosts &&
               currentPosts.map((question, index) => (
                 <StyledQuestionRow key={index}>
-                  <QuestionStat>
+                  <QuestionStat style={{paddingTop:"20px"}}>
                     {typeof question.votes === 'number' ? question.votes : 0}
                     <span>votes</span>
                   </QuestionStat>
-                  <QuestionStat>
+                  <QuestionStat style={{paddingTop:"20px"}}>
                     {typeof question.answers === 'number' ? question.answers : 0}
                     <span>answers</span>
                   </QuestionStat>
-                  <QuestionStat>
+                  <QuestionStat style={{paddingTop:"20px"}}>
                     {typeof question.views === 'number' ? question.views : 0}
                     <span>views</span>
                   </QuestionStat>
-                  <QuestionTitleArea>
+
+                  <QuestionTitleArea style={{paddingTop:"10px"}}>
                     <QuestionLink to={`/client/question/${question.id}`}>
                       {question.title || 'No title'}
                     </QuestionLink>
+
                     <div>
                       {question.tags &&
                         question.tags.map((tag, tagIndex) => (
                           <Tag key={tagIndex}>{typeof tag === 'object' ? tag.name : tag}</Tag>
                         ))}
                     </div>
+
                     <WhoAndWhen>
                       asked {formatDate(question.createdAt)} By{' '}
                       {question.username && question.username != null && (
@@ -343,6 +415,12 @@ const QuestionsPage = () => {
                       )}
                     </WhoAndWhen>
                   </QuestionTitleArea>
+                  <div
+                    className={`favorite-icon ${isFavorite ? 'gold' : ''}`}
+                    onClick={() => handleFavoriteQuestion(question.id)}
+                  >
+                    <FontAwesomeIcon icon={faStar} />
+                  </div>
                 </StyledQuestionRow>
               ))}
 
