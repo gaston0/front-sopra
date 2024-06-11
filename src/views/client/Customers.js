@@ -1,10 +1,9 @@
 import React from 'react';
 import NewNavbar from './homeComponents/NewNavbar';
 import Sidebar from './homeComponents/sidebar';
-import "../client/Customers.css";
+import '../client/Customers.css';
 
 import { NavLink } from 'react-router-dom';
-
 
 const searchSVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
@@ -19,7 +18,7 @@ const Customers = () => {
     <>
       <NewNavbar />
       <div style={{ display: 'flex' }}>
-        <Sidebar /> {/* This div will take up the remaining space */}
+        <Sidebar />
         <div style={{ flex: 1 }}>
           <div style={{ marginTop: '13vh', zIndex: 1, backgroundColor: 'white' }}>
             <div className="">
@@ -27,17 +26,15 @@ const Customers = () => {
                 <div className="stack-index-content">
                   <div className="main">
                     <h1 style={{ marginTop: '-20px' }}>Users</h1>
-                    <div className="mt-5">
+                    <div className="mt-5"></div>
                     
-        </div>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-     
+      </div>
     </>
   );
 };

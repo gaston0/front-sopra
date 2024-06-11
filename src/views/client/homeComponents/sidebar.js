@@ -19,8 +19,8 @@ const Sidebar = () => {
     <div className="">
       <div className="" style={{ height: '110%' }}>
         <div
-          className=" d-flex flex-column flex-shrink-0 p-3 bg-light"
-          style={{ width: '280px', height: '100%' }}
+          className=" d-flex flex-column flex-shrink-0 p-3 bg-light "
+          style={{ width: '250px', height: '100%' ,boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)"}}
         >
           <a
             href="/"

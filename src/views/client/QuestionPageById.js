@@ -4,8 +4,6 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUser, faCalendar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import axios from 'axios';
 import './QuestionPageById.css';
 import NewNavbar from './homeComponents/NewNavbar';
@@ -84,7 +82,21 @@ function QuestionsPageById() {
   const [question, setQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
   const { questionId } = useParams();
-  const [currentUser, setCurrentUser] = useState(null);
+
+  const [responses, setResponses] = useState([]);
+
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [fullScreenSrc, setFullScreenSrc] = useState('');
+
+  const handleImageClick = (src) => {
+    setFullScreenSrc(src);
+    setIsFullScreen(true);
+  };
+
+  const closeFullScreen = () => {
+    setIsFullScreen(false);
+    setFullScreenSrc('');
+  };
 
   library.add(faUser, faCalendar);
 
@@ -115,6 +127,25 @@ function QuestionsPageById() {
     }
   };
 
+  const fetchResponses = async (questionId, answerId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        
+        `http://localhost:8080/api/questions/${questionId}/answers/${answerId}/responses`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setResponses(response.data);
+      console.log('Fetched responses:', response.data);
+    } catch (error) {
+      console.error('Error fetching responses:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchQuestionById = async () => {
       try {
@@ -125,6 +156,7 @@ function QuestionsPageById() {
           },
         });
         setQuestion(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error('Error fetching question data:', error.message);
       }
@@ -147,7 +179,6 @@ function QuestionsPageById() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        // Gérer le cas où le token n'est pas disponible
         console.error("Token d'authentification non disponible");
         return;
       }
@@ -222,6 +253,7 @@ function QuestionsPageById() {
                                 type="application/pdf"
                                 width="800px"
                                 height="400px"
+                                border="1px solid gray"
                               />
                             )}
                             {question.contentType === 'image/jpeg' && (
@@ -230,6 +262,22 @@ function QuestionsPageById() {
                                 type="image/jpeg"
                                 width="800px"
                                 height="400px"
+                                border="1px solid gray"
+                                onClick={() =>
+                                  handleImageClick(`data:image/jpeg;base64,${question.file}`)
+                                }
+                              />
+                            )}
+                            {question.contentType === 'image/png' && (
+                              <embed
+                                src={`data:image/png;base64,${question.file}`}
+                                type="image/png"
+                                width="800px"
+                                height="400px"
+                                border="1px solid black"
+                                onClick={() =>
+                                  handleImageClick(`data:image/png;base64,${question.file}`)
+                                }
                               />
                             )}
                             {question.contentType === 'text/csv' && (
@@ -242,10 +290,15 @@ function QuestionsPageById() {
                             )}
                           </div>
                         )}
+                        {isFullScreen && (
+                          <div className="overlay" onClick={closeFullScreen}>
+                            <img src={fullScreenSrc} alt="Full screen" />
+                          </div>
+                        )}
                         <p className="blog-meta">
                           <span className="author">
                             <FontAwesomeIcon icon="user" style={{ marginRight: '5px' }} />{' '}
-                            {question.userAnonymous ? 'Anonyme' : 'Admin'}
+                            {question.userAnonymous ? 'Anonyme' : question.username}
                           </span>
                           <span className="date">
                             <FontAwesomeIcon icon="calendar" style={{ marginRight: '5px' }} />
@@ -292,12 +345,19 @@ function QuestionsPageById() {
                                     <FontAwesomeIcon
                                       icon="user"
                                       className="user-icon"
-                                      style={{ fontFamily: 'monospace', marginLeft: '50px' }}
+                                      style={{
+                                        fontFamily: 'fantasy',
+                                        marginLeft: '50px',
+                                        marginRight: '10px',
+                                        
+                                      }}
                                     />
+                                    <span style={{ color: 'black' }}> {answer.username}</span>
                                     <span style={{ marginLeft: '5px' }}>{answer.user}</span>
                                     <span className="comment-date" style={{ marginLeft: '5px' }}>
-                                      A répondu le {new Date(answer.createdAt).toLocaleDateString()}
+                                      a répondu le {new Date(answer.createdAt).toLocaleDateString()}
                                     </span>{' '}
+
                                     <button
                                       style={{ marginTop: '5px', marginLeft: '10px' }}
                                       type="button"
@@ -340,10 +400,10 @@ function QuestionsPageById() {
                                   <div>
                                     {answer.responses.length > 0 && (
                                       <div style={{ marginLeft: '20px' }}>
-                                        <h5>Replies:</h5>
+                                        <h5>Replies from {answer.responses.username}:</h5>
                                         {answer.responses.map((response) => (
                                           <Comment key={response.id}>
-                                            <p>{response.content}</p>
+                                            <p>{response}</p>
                                           </Comment>
                                         ))}
                                       </div>

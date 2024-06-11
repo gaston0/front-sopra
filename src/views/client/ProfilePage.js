@@ -153,7 +153,7 @@ function ProfilePage() {
     <>
       <GlobalStyle />
       <NewNavbar />
-      <Container style={{ marginTop: '20px' }}>
+      <Container style={{ paddingTop: '110px' }}>
         <div className="container">
           <div className="row gutters">
             <div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">

@@ -42,3 +42,6 @@
 .favorite-icon:hover {
   color: gold;
 }
+.favorite-icon.gold {
+  color: gold;
+}
