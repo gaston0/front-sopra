@@ -4,6 +4,8 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUser, faCalendar, faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import axios from 'axios';
 import './QuestionPageById.css';
 import NewNavbar from './homeComponents/NewNavbar';
@@ -109,11 +111,6 @@ function QuestionsPageById() {
       );
 
       setAnswer('');
-      await Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: 'Response created successfully!',
-      });
       window.location.reload();
     } catch (error) {
       console.error('Error posting answer:', error.message);
@@ -143,8 +140,7 @@ function QuestionsPageById() {
         },
       });
       setQuestion(response.data);
-
-      console.log(response.data)
+      
     } catch (error) {
       console.error('Error fetching question data:', error.message);
     }
@@ -202,6 +198,7 @@ function QuestionsPageById() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
+        // Gérer le cas où le token n'est pas disponible
         console.error("Token d'authentification non disponible");
         return;
       }
@@ -217,13 +214,7 @@ function QuestionsPageById() {
       );
 
       console.log('Réponse postée avec succès:', response.data);
-
       setReplyContent('');
-      await Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: 'Reply created successfully!',
-      });
       window.location.reload();
     } catch (error) {
       console.error('Erreur lors de la publication de la réponse:', error.message);
@@ -313,7 +304,6 @@ function QuestionsPageById() {
                                 type="application/pdf"
                                 width="800px"
                                 height="400px"
-                                border="1px solid gray"
                               />
                             )}
 
@@ -331,22 +321,6 @@ function QuestionsPageById() {
                                 type="image/jpeg"
                                 width="800px"
                                 height="400px"
-                                border="1px solid gray"
-                                onClick={() =>
-                                  handleImageClick(`data:image/jpeg;base64,${question.file}`)
-                                }
-                              />
-                            )}
-                            {question.contentType === 'image/png' && (
-                              <embed
-                                src={`data:image/png;base64,${question.file}`}
-                                type="image/png"
-                                width="800px"
-                                height="400px"
-                                border="1px solid black"
-                                onClick={() =>
-                                  handleImageClick(`data:image/png;base64,${question.file}`)
-                                }
                               />
                             )}
                             {question.contentType === 'text/csv' && (
@@ -359,6 +333,7 @@ function QuestionsPageById() {
                             )}
                           </div>
                         )}
+
                         <p className="blog-meta">
                         <span>
         <FontAwesomeIcon
@@ -370,7 +345,7 @@ function QuestionsPageById() {
 { totalVote === 1 ?(
         <span className='mx-4'> {totalVote} </span>
 
-):(        <span className='mx-4'>-1</span>
+):(        <span className='mx-4'>0</span>
 )
 }
         <FontAwesomeIcon
@@ -401,10 +376,8 @@ function QuestionsPageById() {
                       <h2 className="title">{question.title}</h2>
                       <p className="content">{question.content}</p>
                       <div className="tags">
-                        <p className="tag" style={{ color: 'black' }}>
-                          Tags :
-                        </p>
-                        <div className="tag-container" style={{ marginBottom: '5px' }}>
+                        <p className="tag">Tags :</p>
+                        <div className="tag-container">
                           {question.tags.map((tag) => (
                             <div key={tag.id} className="tag-item">
                               {tag.name}
@@ -431,19 +404,12 @@ function QuestionsPageById() {
                                     <FontAwesomeIcon
                                       icon="user"
                                       className="user-icon"
-                                      style={{
-                                        fontFamily: 'fantasy',
-                                        marginLeft: '50px',
-                                        marginRight: '10px',
-                                        
-                                      }}
+                                      style={{ fontFamily: 'monospace', marginLeft: '50px' }}
                                     />
-                                    <span style={{ color: 'black' }}> {answer.username}</span>
                                     <span style={{ marginLeft: '5px' }}>{answer.user}</span>
                                     <span className="comment-date" style={{ marginLeft: '5px' }}>
-                                      a répondu le {new Date(answer.createdAt).toLocaleDateString()}
+                                      A répondu le {new Date(answer.createdAt).toLocaleDateString()}
                                     </span>{' '}
-
                                     <button
                                       style={{ marginTop: '5px', marginLeft: '10px' }}
                                       type="button"
@@ -470,7 +436,7 @@ function QuestionsPageById() {
         />
 
         
-        <span className='mx-4'>{answer.votes.length}</span>
+        <span className='mx-4'>{voteValue1}</span>
         
       
         <FontAwesomeIcon
@@ -505,10 +471,10 @@ function QuestionsPageById() {
                                   <div>
                                     {answer.responses.length > 0 && (
                                       <div style={{ marginLeft: '20px' }}>
-                                        <h5>Replies from {answer.responses.username}:</h5>
+                                        <h5>Replies:</h5>
                                         {answer.responses.map((response) => (
                                           <Comment key={response.id}>
-                                            <p>{response}</p>
+                                            <p>{response.content}</p>
                                           </Comment>
                                         ))}
                                       </div>

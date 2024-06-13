@@ -138,7 +138,7 @@ const QuestionsPage = () => {
 
   const votreToken = localStorage.getItem('token');
 /**favotite work */
-const handleFavoriteQuestion = async (questionId) => {
+/*const handleFavoriteQuestion = async (questionId) => {
   try {
     
     const question = questionDatas.find((question) => question.id === questionId);
@@ -191,7 +191,7 @@ const handleFavoriteQuestion = async (questionId) => {
   } catch (error) {
     console.error('Erreur lors de la requête pour marquer/supprimer la question comme favori :', error);
   }
-};
+};*/
 
   
     
@@ -463,7 +463,7 @@ const handleFavoriteQuestion = async (questionId) => {
                     {question.answers && question.answers.length}
                     <span>answers</span>
                   </QuestionStat>
-                  <QuestionStat style={{ paddingTop: '20px' }}>
+                  <QuestionStat >
                     {typeof question.views === 'number' ? question.views : 0}
                     <span>views</span>
                   </QuestionStat>

@@ -11,6 +11,7 @@ import Tags from 'src/views/client/homeComponents/Tags';
 import AjouterModerateur from 'src/views/sample-page/AjouterModerateur';
 import UserProfile from 'src/views/client/UserProfile';
 import Customers from 'src/views/client/Customers';
+import QuestionOnTags from 'src/views/client/homeComponents/QuestionOnTags';
 
 
 
@@ -78,7 +79,9 @@ const Router = [
       { path: '/client/question/:questionId', element: <QuestionsPageById /> },
       { path: '/client/Customers', element: <Customers /> },
       { path: '/client/tags', element: <Tags /> },
-      {path : '/client/profile', element: <UserProfile />}
+      {path : '/client/profile', element: <UserProfile />},
+      { path:"/client/questionOntags/:tag", element:<QuestionOnTags /> },
+
 
     ],
   },

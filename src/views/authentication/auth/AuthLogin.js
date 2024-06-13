@@ -31,7 +31,10 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
           navigate('/dashboard');
         } else {
           navigate('/client/home');
-        }}}
+        }}catch {
+console.log('erreur');
+
+        }}
     }, []);
     
     const handleLogin = async () => {

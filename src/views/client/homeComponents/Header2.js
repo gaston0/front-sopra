@@ -32,7 +32,7 @@ function Header2({ onDataUpdate  }) {
 
   const handleFilterChange = (filter) => {
     if (filter === activeFilter) {
-      onAllQuestionsClick();
+     // onAllQuestionsClick();
       setActiveFilter('');
       return;
     }
