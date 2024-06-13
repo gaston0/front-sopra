@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faUser, faCalendar } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faCalendar, faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import './QuestionPageById.css';
 import NewNavbar from './homeComponents/NewNavbar';
-import Swal from 'sweetalert2';
+import { Alert } from 'bootstrap';
+import { FaLink } from 'react-icons/fa';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=PlusJakartaSans:wght@300,400;700&display=swap');
@@ -53,7 +54,7 @@ const Cader = styled.div`
   border-radius: 10px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 10px;
-`;
+`; 
 const Comment = styled.div`
   background: #f2f2f1;
   padding: 10px;
@@ -82,22 +83,14 @@ function QuestionsPageById() {
   const [question, setQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
   const { questionId } = useParams();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [voteValue, setVoteValue] = useState(null);
+  const [totalVote,setTotalVote]= useState(null);
+  const [voteValue1, setVoteValue1] = useState(null);
 
-  const [responses, setResponses] = useState([]);
-
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [fullScreenSrc, setFullScreenSrc] = useState('');
-
-  const handleImageClick = (src) => {
-    setFullScreenSrc(src);
-    setIsFullScreen(true);
-  };
-
-  const closeFullScreen = () => {
-    setIsFullScreen(false);
-    setFullScreenSrc('');
-  };
-
+  const userObject = JSON.parse(localStorage.getItem('user'));
+  const userId = userObject ? userObject.id : null;
+  
   library.add(faUser, faCalendar);
 
   const handleSubmit = async (event) => {
@@ -106,7 +99,7 @@ function QuestionsPageById() {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:8080/api/questions/${questionId}/answers`,
+        `http://localhost:8082/api/questions/${questionId}/answers`,
         { content: answer },
         {
           headers: {
@@ -127,47 +120,77 @@ function QuestionsPageById() {
     }
   };
 
-  const fetchResponses = async (questionId, answerId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        
-        `http://localhost:8080/api/questions/${questionId}/answers/${answerId}/responses`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      setResponses(response.data);
-      console.log('Fetched responses:', response.data);
-    } catch (error) {
-      console.error('Error fetching responses:', error);
+  const handleAddLink = () => {
+    const link = prompt('Enter the link URL:');
+    if (link) {
+      setAnswer((prevAnswer) => `${prevAnswer} [${link}](${link})`);
+    }
+  };
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setAnswer((prevAnswer) => `${prevAnswer} \n[File: ${file.name}]`);
     }
   };
 
+
+  const fetchQuestionById = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:8082/api/questions/${questionId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setQuestion(response.data);
+
+      console.log(response.data)
+    } catch (error) {
+      console.error('Error fetching question data:', error.message);
+    }
+  };
+
+
+  const fetchVote = async () => {
+
+    const entityType = 'Question';
+    const entityId = questionId
+  axios.get(`http://localhost:8082/api/votes/status`, {
+    params: {
+      entityType,
+      entityId,
+      userId
+    }
+  })
+  .then(response => {
+    setVoteValue(response.data.value);
+    setTotalVote(response.data.totalVotes)
+    console.log(response.data)
+  })
+  .catch(error => {
+    console.error('There was an error fetching the vote status!', error);
+  });
+  }
   useEffect(() => {
-    const fetchQuestionById = async () => {
+  
+    const incrementView = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8080/api/questions/${questionId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setQuestion(response.data);
-        console.log(response.data);
+        await axios.put(`http://localhost:8082/api/questions/${questionId}/increment-view`);
+        console.log("View count incremented successfully.");
       } catch (error) {
-        console.error('Error fetching question data:', error.message);
+        console.error("Error incrementing view count:", error);
       }
     };
-
+  
+    incrementView();
+    fetchVote();
     fetchQuestionById();
-  }, [questionId]);
+  }, [questionId,]);
 
   const [replyToId, setReplyToId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
   const replyFormRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleReplyClick2 = (answerId) => {
     setReplyToId(answerId);
@@ -184,7 +207,7 @@ function QuestionsPageById() {
       }
 
       const response = await axios.post(
-        `http://localhost:8080/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
+        `http://localhost:8082/api/questions/${questionId}/answers/${parentAnswerId}/responses`,
         { content: replyContent },
         {
           headers: {
@@ -207,6 +230,43 @@ function QuestionsPageById() {
     }
   };
 
+
+  const handleVote = (value) => {
+    axios.post(`http://localhost:8082/api/votes/Question/${questionId}`, null, {
+      params: {
+        userId,
+        value
+      }
+    })
+    .then(response => {
+      console.log(response.data);
+      setVoteValue(value);
+
+      alert(response.data);
+      window.location.reload()// Update the vote value state
+    })
+    .catch(error => {
+      console.error('There was an error!', error);
+    });
+  };  
+  const handleVote1 = (value,id) => {
+    axios.post(`http://localhost:8082/api/votes/Answer/${id}`, null, {
+      params: {
+        userId,
+        value
+      }
+    })
+    .then(response => {
+      console.log(response.data);
+      setVoteValue1(value);
+
+      alert(response.data);
+      window.location.reload()// Update the vote value state
+    })
+    .catch(error => {
+      console.error('There was an error!', error);
+    });
+  };  
   const handleClickOutside = (event) => {
     if (replyFormRef.current && !replyFormRef.current.contains(event.target)) {
       setReplyToId(null);
@@ -256,6 +316,15 @@ function QuestionsPageById() {
                                 border="1px solid gray"
                               />
                             )}
+
+{question.contentType === 'image/png' && (
+                              <embed
+                                src={`data:image/png;base64,${question.file}`}
+                                type="image/png"
+                                width="800px"
+                                height="400px"
+                              />
+                            )}
                             {question.contentType === 'image/jpeg' && (
                               <embed
                                 src={`data:image/jpeg;base64,${question.file}`}
@@ -290,15 +359,30 @@ function QuestionsPageById() {
                             )}
                           </div>
                         )}
-                        {isFullScreen && (
-                          <div className="overlay" onClick={closeFullScreen}>
-                            <img src={fullScreenSrc} alt="Full screen" />
-                          </div>
-                        )}
                         <p className="blog-meta">
+                        <span>
+        <FontAwesomeIcon
+          icon={faThumbsUp}
+          onClick={() => handleVote(1)}
+          style={{ cursor: voteValue === 1 ? 'default' : 'pointer', color: voteValue === 1 ? 'green' : 'black' }}
+          disabled={voteValue === 1}
+        />
+{ totalVote === 1 ?(
+        <span className='mx-4'> {totalVote} </span>
+
+):(        <span className='mx-4'>-1</span>
+)
+}
+        <FontAwesomeIcon
+          icon={faThumbsDown}
+          onClick={() => handleVote(0)}
+          style={{ cursor: voteValue === 0 ? 'default' : 'pointer', color: voteValue === 0 ? 'red' : 'black' }}
+          disabled={voteValue === 0}
+        />
+      </span>
                           <span className="author">
                             <FontAwesomeIcon icon="user" style={{ marginRight: '5px' }} />{' '}
-                            {question.userAnonymous ? 'Anonyme' : question.username}
+                            {question.userAnonymous ? 'Anonyme' : 'Utilisateur'}
                           </span>
                           <span className="date">
                             <FontAwesomeIcon icon="calendar" style={{ marginRight: '5px' }} />
@@ -312,6 +396,8 @@ function QuestionsPageById() {
                           </span>
                         </p>
                       </p>
+
+
                       <h2 className="title">{question.title}</h2>
                       <p className="content">{question.content}</p>
                       <div className="tags">
@@ -375,6 +461,25 @@ function QuestionsPageById() {
                                       {answer.content}
                                     </p>
                                   </Cader>
+                                  <span>
+        <FontAwesomeIcon
+          icon={faThumbsUp}
+          onClick={() => handleVote1(1,answer.id)}
+          style={{ cursor: voteValue1 === 1 ? 'default' : 'pointer', color: voteValue1 === 1 ? 'green' : 'black' }}
+          disabled={voteValue1 === 1}
+        />
+
+        
+        <span className='mx-4'>{answer.votes.length}</span>
+        
+      
+        <FontAwesomeIcon
+          icon={faThumbsDown}
+          onClick={() => handleVote1(0,answer.id)}
+          style={{ cursor: voteValue1 === 0 ? 'default' : 'pointer', color: voteValue1 === 0 ? 'red' : 'black' }}
+          disabled={voteValue1 === 0}
+        />
+      </span>
                                   {replyToId === answer.id && (
                                     <form
                                       ref={replyFormRef}
@@ -414,33 +519,42 @@ function QuestionsPageById() {
                               <Separator />
                             </React.Fragment>
                           ))}
-                          <span style={{ fontSize: '20px', color: 'black', marginBottom: '10px' }}>
-                            Make your answer with love :{' '}
-                          </span>
-                          <form onSubmit={handleSubmit} style={{ marginTop: '5px' }}>
-                            <textarea
-                              value={answer}
-                              onChange={(e) => setAnswer(e.target.value)}
-                              placeholder="Your answer"
-                              cols="30"
-                              rows="3"
-                              style={{ width: '100%', marginBottom: '10px' }}
-                            />
-                            <button
-                              className="btn"
-                              style={{
-                                marginRight: '20px',
-                                backgroundColor: '#cf022b',
-                                color: '#fff',
-                              }}
-                            >
-                              Submit
-                            </button>
-                          </form>
+  <form onSubmit={handleSubmit}>
+  <div style={{ position: 'relative' }}>
+    <textarea
+      value={answer}
+      onChange={(e) => setAnswer(e.target.value)}
+      placeholder="Your answer"
+      cols="30"
+      rows="3"
+      style={{ width: '100%', marginBottom: '10px', paddingRight: '40px' }}
+    />
+    <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+      <button type="button" onClick={handleAddLink} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '24px' }}>
+        <FaLink />
+      </button>
+      <input
+        type="file"
+        id="fileInput"
+        onChange={handleFileUpload}
+        style={{ display: 'none' }}
+      />
+      <label htmlFor="fileInput" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '24px' }}>
+        <svg viewBox="0 0 24 24" style={{ width: '24px', height: '24px' }}>
+          <path d="M20,20H4V4H12L14,2H4C2.89,2 2,2.89 2,4V20C2,21.1 2.9,22 4,22H20C21.1,22 22,21.1 22,20V10H20V20M20,8V4H14L20,8Z" />
+        </svg>
+      </label>
+    </div>
+  </div>
+  <button type="submit">Post your answer</button>
+</form>
+
                         </div>
                       </div>
                     </div>
                   </div>
+
+
                 </div>
               </div>
             </div>

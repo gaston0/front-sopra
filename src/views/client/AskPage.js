@@ -5,6 +5,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
 import Select from 'react-select';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserSecret } from '@fortawesome/free-solid-svg-icons';
 
 const AskPage = () => {
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ const AskPage = () => {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -84,7 +86,7 @@ const AskPage = () => {
 
     // Send the data to the server with Axios
     try {
-      const response = await axios.post('http://localhost:8080/api/questions/create', formData, {
+      const response = await axios.post('http://localhost:8082/api/questions/create', formData, {
         headers: headers, // Pass the headers object to Axios
       });
 
@@ -130,6 +132,7 @@ const AskPage = () => {
                 <li>Describe your problem in more detail.</li>
                 <li>Describe what you tried and what you expected to happen.</li>
                 <li>Add “tags” which help surface your question to members of the community.</li>
+                <li>You can add a question as Anonyme.</li>
               </ul>
             </div>
           </div>
@@ -185,19 +188,21 @@ const AskPage = () => {
               </div>
             </div>
             <div className="form-group form-check" style={{marginTop:"30px"}}>
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="anonymousCheckbox"
-                checked={isAnonymous}
-                style={{backgroundColor:"red",borderColor:"white"}}
-                onChange={(e) => setIsAnonymous(e.target.checked)}
-              />
-              <label className="form-check-label" htmlFor="anonymousCheckbox">
-                Rester anonyme
-              </label>
-            </div>
-            <button type="submit" className="btn  mt-5 mb-5"  style={{ marginRight: '20px', backgroundColor: '#cf022b', color: '#fff' }}>
+  <input
+    type="checkbox"
+    className="form-check-input"
+    id="anonymousCheckbox"
+    checked={isAnonymous}
+    style={{backgroundColor:"red",borderColor:"white"}}
+    onChange={(e) => setIsAnonymous(e.target.checked)}
+  />
+  <label className="form-check-label" htmlFor="anonymousCheckbox">
+  <FontAwesomeIcon icon={faUserSecret} style={{ marginRight: "5px" }} />
+    Rester anonyme
+  </label>
+</div>
+
+            <button type="submit" className="btn btn-danger custom-btn mt-5 mb-5">
               Ask Question
             </button>
           </form>

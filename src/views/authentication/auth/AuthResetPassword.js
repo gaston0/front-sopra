@@ -5,11 +5,14 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router';
 
 const AuthResetPassword = ({ subtext }) => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [error, setError] = useState('');
+    
+        const navigate = useNavigate();
+        const [email, setEmail] = useState('');
+        const [oldPassword, setOldPassword] = useState('');
+        const [newPassword, setNewPassword] = useState('');
+        const [error, setError] = useState('');
+    
+       
 
   const handleReset = async (event) => {
     event.preventDefault();

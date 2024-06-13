@@ -1,0 +1,18 @@
+.profile-header {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profile-avatar {
+    margin-right: 20px;
+  }
+  
+  .profile-info {
+    /* Style username, user information */
+  }
+  
+  .filter-section {
+    margin-top: 20px;
+  }
+  
+  /* Style date inputs, dropdown, etc. */

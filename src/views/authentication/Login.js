@@ -8,7 +8,6 @@ import Logo from 'src/layouts/full/shared/logo/Logo';
 import AuthLogin from './auth/AuthLogin';
 
 const Login2 = () => {
-  
   return (
     <PageContainer title="Login" description="this is Login page">
       <Box
@@ -23,10 +22,16 @@ const Login2 = () => {
             height: '100%',
             width: '100%',
             opacity: '0.3',
+            zIndex: 1, // Ensure this overlay is above the background image
           },
+          backgroundImage: 'url(/assets/backgrounds/image.jpg)', // Correct path for public folder
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          height: '100vh',
+          width: '100%',
         }}
       >
-        <Grid container spacing={0} justifyContent="center" sx={{ height: '100vh' }}>
+        <Grid container spacing={0} justifyContent="center" sx={{ height: '100%' }}>
           <Grid
             item
             xs={12}
@@ -37,7 +42,7 @@ const Login2 = () => {
             justifyContent="center"
             alignItems="center"
           >
-            <Card elevation={9} sx={{ p: 4, zIndex: 1, width: '100%', maxWidth: '500px' }}>
+            <Card elevation={9} sx={{ p: 4, zIndex: 2, width: '100%', maxWidth: '500px' }}>
               <Box display="flex" alignItems="center" justifyContent="center">
                 <Logo />
               </Box>

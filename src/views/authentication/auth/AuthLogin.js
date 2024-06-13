@@ -31,45 +31,38 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
           navigate('/dashboard');
         } else {
           navigate('/client/home');
+        }}}
+    }, []);
+    
+    const handleLogin = async () => {
+        try {
+            const response = await axios.post('http://localhost:8082/api/auth/signin', {
+                username,
+                password
+            });
+            
+            if (response.data && response.data.accessToken) {
+                const token = response.data.accessToken;
+                const user = response.data;
+                
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                const userRole = user.roles && user.roles.length > 0 ? user.roles[0] : null;
+    
+                if (userRole === 'ROLE_ADMIN') {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/client/home');
+                }
+            } else {
+                setError('Nom d\'utilisateur ou mot de passe incorrect');
+            }
+        } catch (error) {
+            console.error('Error during login:', error);
+            setError('Une erreur est survenue. Veuillez réessayer plus tard.');
         }
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        navigate('/auth/login');
-      }
-    } else {
-      navigate('/auth/login');
-    }
-  }, []);
-
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post('http://localhost:8080/api/auth/signin', {
-        username,
-        password,
-      });
-
-      if (response.data && response.data.accessToken) {
-        const token = response.data.accessToken;
-        const user = response.data;
-
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-
-        const userRole = user.roles && user.roles.length > 0 ? user.roles[0] : null;
-
-        if (userRole === 'ROLE_ADMIN') {
-          navigate('/dashboard');
-        } else {
-          navigate('/client/home');
-        }
-      } else {
-        setError("Nom d'utilisateur ou mot de passe incorrect");
-      }
-    } catch (error) {
-      console.error('Error during login:', error);
-      setError('Une erreur est survenue. Veuillez réessayer plus tard.');
-    }
-  };
+      } ;
 
   return (
     <>

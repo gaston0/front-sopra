@@ -5,12 +5,14 @@ import NewNavbar from './NewNavbar';
 import Header2 from './Header2';
 import { Link } from 'react-router-dom';
 import Pagination from './pagination';
-import '../homeComponents/QuestionsPage.css';
 import axios from 'axios';
-import Swal from 'sweetalert2';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FaSun, FaMoon } from 'react-icons/fa';
 import Select from 'react-select';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+
 
 const QuestionStat = styled.div`
   text-align: center;
@@ -69,7 +71,7 @@ const StyledQuestionRow = styled.div`
   border-radius: 5px;
   margin-bottom: 20px;
   padding: 10px;
-  margin-right: 10px;
+  margin-right:10px;
   box-shadow: 1px 1px #888888;
 `;
 
@@ -92,6 +94,20 @@ const FilterItemLabel = styled.span`
   font-weight: bold;
 `;
 
+const FilterInput = styled.input`
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+`;
+
+const FilterSelect = styled.select`
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+`;
+
 const QuestionsPage = () => {
   const [postPerPage] = useState(4);
   const [currentPage, setcurrentPage] = useState(1);
@@ -102,6 +118,7 @@ const QuestionsPage = () => {
   const [searchTitle, setSearchTitle] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [mode, setMode] = useState('light'); // Default mode is light
   const [isFavorite, setIsFavorite] = useState(false);
 
   const formatDate = (dateString) => {
@@ -111,8 +128,12 @@ const QuestionsPage = () => {
     const year = date.getFullYear();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-
     return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
+  const toggleMode = () => {
+    const newMode = mode === 'light' ? 'dark' : 'light';
+    setMode(newMode);
   };
 
   const votreToken = localStorage.getItem('token');
@@ -186,11 +207,9 @@ const handleFavoriteQuestion = async (questionId) => {
       console.error('Erreur lors de la récupération des données de la question:', error);
     }
   };
-  /**favorite code ending */
-/**get all questions */
   const fetchAllQuestions = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/questions/all', {
+      const response = await fetch('http://localhost:8082/api/questions/all', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,13 +220,12 @@ const handleFavoriteQuestion = async (questionId) => {
           userId: null,
           tags: [],
           pageIndex: 0,
-          pageSize: 40,
+          pageSize: 10,
           userAnonymous: null,
         }),
       });
-
       const data = await response.json();
-
+      console.log(data);
       if (Array.isArray(data)) {
         setQuestionData(data);
       } else {
@@ -231,30 +249,21 @@ const handleFavoriteQuestion = async (questionId) => {
   const handleDataFromChild = (data) => {
     setQuestionData(data);
   };
-//**get all questions again after unclicked the filtrage */
-  const handleAllQuestionsClick = async (
-    title,
-    content,
-    userId,
-    tags,
-    pageIndex,
-    pageSize,
-    userAnonymous,
-  ) => {
+
+  const handleAllQuestionsClick = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/questions/all', {
+      const response = await fetch('http://localhost:8082/api/questions/all', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: title || '',
-          content: content || '',
-          userId: userId || null,
-          tags: tags || [],
-          pageIndex: pageIndex || 0,
-          pageSize: pageSize || 40,
-          userAnonymous: userAnonymous || null,
+          title: searchTitle,
+          userId: selectedUser,
+          tags: selectedTags,
+          pageIndex: 0,
+          pageSize: 15,
+          userAnonymous: null,
         }),
       });
 
@@ -271,61 +280,9 @@ const handleFavoriteQuestion = async (questionId) => {
   };
 
   useEffect(() => {
-    fetchAllQuestions();
-  }, [votreToken]);
-  //**get all questions again after unclicked the filtrage ending */
-/**filtrage search */
-  const handleSearch = async () => {
-    if (!searchTitle && !selectedUser && selectedTags.length === 0) {
-      fetchAllQuestions();
-      return;
-    }
-
-    const requestData = {
-      content: '',
-      pageIndex: 0,
-      pageSize: 15,
-    };
-
-    if (Array.isArray(selectedTags) && selectedTags.length > 0) {
-      if (selectedTags.every((tag) => typeof tag === 'string')) {
-        requestData.tags = selectedTags;
-      } else {
-        console.error('selectedTags ne contient pas les données attendues.');
-        return;
-      }
-    }
-
-    if (searchTitle) {
-      requestData.title = searchTitle;
-    }
-
-    if (selectedUser === 'Anonyme') {
-      requestData.username = null;
-    } else if (selectedUser) {
-      requestData.userId = parseInt(selectedUser, 10);
-    }
-
-    console.log('Request Data:', requestData);
-
-    try {
-      const response = await axios.post('http://localhost:8080/api/questions/all', requestData, {
-        headers: {
-          Authorization: `Bearer ${votreToken}`,
-        },
-      });
-
-      setQuestionData(response.data);
-      console.log('Résultats de la recherche :');
-    } catch (error) {
-      console.error('Erreur lors de la recherche :', error.message);
-    }
-  };
-/**get all tags to show it in the bar search */
-  useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -335,10 +292,10 @@ const handleFavoriteQuestion = async (questionId) => {
         console.error('Erreur lors de la récupération des tags :', error.message);
       }
     };
-/**get all users to show it in the bar search */
+
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/users', {
+        const response = await axios.get('http://localhost:8082/api/users', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -352,18 +309,66 @@ const handleFavoriteQuestion = async (questionId) => {
 
     fetchTags();
     fetchUsers();
-  }, [votreToken]);
+  }, []);
 
-  /** have multiple tags */
-  const handleTagChange = (event) => {
-    const options = event.target.options;
-    const selectedOptions = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedOptions.push(options[i].value);
-      }
+  const handleSearch = async () => {
+    if (!searchTitle && !selectedUser && !selectedTags.length) {
+      fetchAllQuestions();
+      return;
     }
-    setSelectedTags(selectedOptions);
+
+    console.log('alll', selectedTags);
+    const requestData = {
+      content: '',
+      pageIndex: 0,
+      pageSize: 15,
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
+      title: searchTitle ? searchTitle : undefined,
+      userAnonymous: selectedUser === 'Anonyme',
+      userId: selectedUser ? parseInt(selectedUser, 10) : '',
+    };
+
+    try {
+      const response = await axios.post('http://localhost:8082/api/questions/all', requestData, {
+        headers: {
+          Authorization: `Bearer ${votreToken}`,
+        },
+      });
+
+      setQuestionData(response.data);
+      console.log('Résultats de la recherche :', response.data);
+    } catch (error) {
+      console.error('Erreur lors de la recherche :', error.message);
+    }
+  };
+
+  const handleTagChange = (selectedOptions) => {
+    const values = selectedOptions ? selectedOptions.map(option => option.value) : [];
+    setSelectedTags(values);
+  };
+
+  const options = tags.map(tag => ({ value: tag.name, label: tag.name }));
+  const handleFavoriteQuestion = async (questionId) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:8082/api/favorites/markQuestionAsFavorite/${questionId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${votreToken}`,
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        Swal.fire('Question ajoutée comme favoris', '', 'success');
+        setIsFavorite(response.data.isFavorite); // Update isFavorite based on response
+      } else {
+        Swal.fire('Erreur dans l\'ajout', '', 'error');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la requête pour marquer la question comme favorit :', error);
+    }
   };
   
   return (
@@ -371,30 +376,30 @@ const handleFavoriteQuestion = async (questionId) => {
       <NewNavbar />
       <div style={{ display: 'flex' }}>
         <Sidebar />
-        <div style={{ flex: 3 }}>
+        <div style={{ flex: 1 }}>
           <Header2
             onDataUpdate={handleDataFromChild}
             onAllQuestionsClick={handleAllQuestionsClick}
           />
           <>
-            <div
+          <div
               className="filter-container"
               style={{
                 borderTop: 'solid 1px gray',
                 borderRight: 'solid 1px gray',
                 borderLeft: 'solid 1px gray',
-                borderBottom: 'solid 1px gray',
-                marginBottom: '20px',
-                marginRight: '10px',
-                borderRadius: '5px',
+                borderBottom:'solid 1px gray',
+                marginBottom:"20px",
+                marginRight:"10px",
                 paddingBottom: '20px',
-                marginLeft: '10px',
                 paddingTop: 10,
               }}
             >
-              <div className="filter-item" style={{ marginLeft: '5px' }}>
-                <span style={{ color: '#000000' }}>Titre :</span>
-                <input
+              
+            <FilterContainer className="mb-4">
+              <FilterItem style={{paddingLeft:"10px"}}>
+                <FilterItemLabel >Titre :</FilterItemLabel>
+                <FilterInput
                   type="text"
                   id="searchInput"
                   placeholder="Rechercher par titre..."
@@ -402,58 +407,60 @@ const handleFavoriteQuestion = async (questionId) => {
                   onChange={(e) => setSearchTitle(e.target.value)}
                   style={{ height: '35px' }}
                 />
-              </div>
-              <div className="filter-item">
-                <span style={{ color: '#000000' }}>Utilisateurs :</span>
-                <select
+              </FilterItem>
+              <FilterItem>
+                <FilterItemLabel>Utilisateurs :</FilterItemLabel>
+                <FilterSelect
                   id="userSelect"
                   value={selectedUser}
                   onChange={(e) => setSelectedUser(e.target.value)}
                 >
-                  <option value="">Tous les utilisateurs</option>
-                  <option value="Anonyme">Anonyme</option>
+                  <option value="">Aucun</option>
                   {users.map((user) => (
                     <option key={user.matricul} value={user.matricul}>
                       {user.username}
                     </option>
                   ))}
-                </select>
-              </div>
-              <div className="filter-item">
-                <span style={{ color: '#000000' }}>Tags :</span>
-
-                <select id="tagsSelect" value={selectedTags} multiple onChange={handleTagChange}>
-                  {tags.map((tag) => (
-                    <option key={tag.name} value={tag.name}>
-                      {tag.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-item">
+                  <option value="Anonyme">Anonyme</option>
+                </FilterSelect>
+              </FilterItem>
+              <FilterItem>
+                <FilterItemLabel>Tags :</FilterItemLabel>
+                <Select
+                  id="tagsSelect"
+                  value={options.filter((option) => selectedTags.includes(option.value))}
+                  onChange={handleTagChange}
+                  options={options}
+                  isMulti
+                  placeholder="Select tags..."
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              </FilterItem>
+              <FilterItem>
                 <button
                   onClick={handleSearch}
                   className="btn btn-outline-danger"
-                  style={{
-                    marginRight: '20px',
-                    marginLeft: '30px',
-                    marginTop: '23px',
-                  }}
+                  style={{ marginTop: '27px' }}
                 >
                   Rechercher
                 </button>
-              </div>
+              
+              </FilterItem>
+            </FilterContainer>
             </div>
             {error && <p>{error}</p>}
             {currentPosts &&
               currentPosts.map((question, index) => (
-                <StyledQuestionRow key={index} style={{ marginLeft: '10px' }}>
-                  <QuestionStat style={{ paddingTop: '20px' }}>
-                    {typeof question.votes === 'number' ? question.votes : 0}
+                <StyledQuestionRow key={index}>
+                  <QuestionStat>
+                    {(!question.answers && typeof question.voteCount === 'number') ? question.voteCount : !question.answers ? 0 : ''}
+                    {question.votes && question.votes.length}
                     <span>votes</span>
                   </QuestionStat>
-                  <QuestionStat style={{ paddingTop: '20px' }}>
-                    {typeof question.answers === 'number' ? question.answers : 0}
+                  <QuestionStat>
+                    {(!question.answers && typeof question.answerCount === 'number') ? question.answerCount : !question.answers ? 0 : ''}
+                    {question.answers && question.answers.length}
                     <span>answers</span>
                   </QuestionStat>
                   <QuestionStat style={{ paddingTop: '20px' }}>
@@ -469,7 +476,9 @@ const handleFavoriteQuestion = async (questionId) => {
                     <div>
                       {question.tags &&
                         question.tags.map((tag, tagIndex) => (
-                          <Tag key={tagIndex}>{typeof tag === 'object' ? tag.name : tag}</Tag>
+                          <Tag key={tagIndex}>
+                            {typeof tag === 'object' ? tag.name : tag}
+                          </Tag>
                         ))}
                     </div>
 
@@ -488,14 +497,11 @@ const handleFavoriteQuestion = async (questionId) => {
                     </WhoAndWhen>
                   </QuestionTitleArea>
                   <div
-  className={`favorite-icon ${
-    question.favorites && question.favorites.length > 0 ? 'gold' : ''
-  }`}
-  onClick={() => handleFavoriteQuestion(question.id)}
+    className={`favorite-icon ${isFavorite ? 'gold' : ''}`}
+    onClick={() => handleFavoriteQuestion(question.id)}
 >
-  <FontAwesomeIcon icon={faStar} />
+    <FontAwesomeIcon icon={faStar} />
 </div>
-
                 </StyledQuestionRow>
               ))}
 

@@ -16,7 +16,7 @@ export default function Tags() {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -48,13 +48,13 @@ export default function Tags() {
     if (formValues && formValues.name) {
       // Call API to add the new tag
       try {
-        await axios.post('http://localhost:8080/api/tags/create', formValues, {
+        await axios.post('http://localhost:8082/api/tags/create', formValues, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
         });
         // Refresh the tags list
-        const response = await axios.get('http://localhost:8080/api/tags/getAll', {
+        const response = await axios.get('http://localhost:8082/api/tags/getAll', {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -82,7 +82,7 @@ export default function Tags() {
 
     if (confirmation.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:8080/api/tags/${tagId}`, {
+        await axios.delete(`http://localhost:8082/api/tags/${tagId}`, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -116,7 +116,7 @@ export default function Tags() {
 
     if (updatedTag) {
       try {
-        await axios.put(`http://localhost:8080/api/tags/${tagId}`, updatedTag, {
+        await axios.put(`http://localhost:8082/api/tags/${tagId}`, updatedTag, {
           headers: {
             Authorization: `Bearer ${votreToken}`,
           },
@@ -175,7 +175,7 @@ export default function Tags() {
                             <div className="card-body">
                               <NavLink
                                 className="card-title p-1"
-                                to={{ pathname: `/questionOntags/${tag.name}` }}
+                                to={{ pathname: `/client/questionOntags/${tag.name}` }}
                                 style={{
                                   color: 'hsl(205,47%,42%)',
                                   backgroundColor: 'hsl(205,46%,92%)',
